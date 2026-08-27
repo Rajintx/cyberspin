@@ -9,11 +9,9 @@ uniform float chromatic_aberration : hint_range(0.0, 0.01) = 0.002;
 uniform float crt_brightness : hint_range(0.5, 2.0) = 1.06;
 
 vec2 curve(vec2 uv) {
-	uv = (uv - 0.5) * 2.0;
-	uv *= 1.05;
-	uv.x *= 1.0 + pow((abs(uv.y) / 5.0), 2.0) * curvature * 10.0;
-	uv.y *= 1.0 + pow((abs(uv.x) / 4.0), 2.0) * curvature * 10.0;
-	uv = (uv / 2.0) + 0.5;
+	vec2 d = uv - 0.5;
+	float r2 = dot(d, d);
+	uv = uv + d * (r2 * curvature * 2.0);
 	return uv;
 }
 

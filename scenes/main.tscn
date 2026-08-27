@@ -166,12 +166,10 @@ theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBoxFlat_restart")
 text = "INITIALIZE NEW RUN"
 
-[node name="TopBarLayer" type="CanvasLayer" parent="."]
-layer = 5
-
-[node name="SettingsButton" type="Button" parent="TopBarLayer"]
+[node name="SettingsButton" type="Button" parent="."]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(36, 36)
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -185,9 +183,10 @@ theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_gear")
 text = "⚙️"
 
-[node name="SettingsModal" parent="TopBarLayer" instance=ExtResource("7_s8m9n")]
+[node name="SettingsModal" parent="." instance=ExtResource("7_s8m9n")]
 unique_name_in_owner = true
 visible = false
+layout_mode = 1
 
 [node name="PiPOverlay" parent="." instance=ExtResource("6_p7q8r")]
 unique_name_in_owner = true

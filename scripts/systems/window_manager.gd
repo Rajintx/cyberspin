@@ -34,7 +34,8 @@ func set_resolution(target_size: Vector2i) -> void:
 	current_resolution = target_size
 	if not is_pip_mode and not is_fullscreen:
 		DisplayServer.window_set_size(target_size)
-		get_tree().root.content_scale_size = target_size
+		# Keep base content scale size at standard 1280x720 so canvas_items stretch handles aspect scaling correctly
+		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
 		# Center window on current screen
 		var current_screen := DisplayServer.window_get_current_screen()
 		var screen_rect := DisplayServer.screen_get_usable_rect(current_screen)
@@ -54,6 +55,7 @@ func set_fullscreen(enabled: bool) -> void:
 		if is_pip_mode:
 			set_pip_mode(false)
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		set_resolution(current_resolution)
