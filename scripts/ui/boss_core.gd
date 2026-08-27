@@ -2,6 +2,7 @@ class_name BossCore
 extends PanelContainer
 
 signal boss_died(enemy: EnemyData)
+signal stage_transitioned(enemy: EnemyData, stage_index: int)
 
 var enemy_data: EnemyData
 var current_hp: int = 50
@@ -34,7 +35,6 @@ var current_intent_index: int = 0
 @onready var hit_flash: ColorRect = %HitFlash
 
 var _base_style: StyleBoxFlat
-var _breathing_tween: Tween
 
 func _ready() -> void:
 	_base_style = get_theme_stylebox("panel").duplicate() as StyleBoxFlat
@@ -44,13 +44,27 @@ func _ready() -> void:
 
 func init_enemy(data: EnemyData) -> void:
 	enemy_data = data
+	enemy_data.current_stage_index = 0
 	max_hp = data.max_hp
 	current_hp = max_hp
 	current_shield = data.starting_shield
 	current_intent_index = 0
+	is_enraged = false
+
+	overheat_stacks = 0
+	virus_stacks = 0
+	emp_stacks = 0
+	glitch_stacks = 0
 
 	avatar_label.text = data.avatar_glyph
-	reset_boss_visuals()
+	name_label.text = data.display_name
+	name_label.modulate = data.theme_color
+
+	if _base_style:
+		_base_style.border_color = data.theme_color
+		_base_style.shadow_color = Color(data.theme_color.r, data.theme_color.g, data.theme_color.b, 0.4)
+
+	update_ui()
 	update_intent_display()
 
 func update_ui() -> void:
@@ -79,7 +93,8 @@ func update_ui() -> void:
 func get_current_intent() -> Dictionary:
 	if not enemy_data or enemy_data.intent_sequence.is_empty():
 		return {"type": EnemyData.IntentType.ATTACK, "value": 8, "name": "Basic Attack", "desc": "Deals 8 DMG"}
-	return enemy_data.intent_sequence[current_intent_index % enemy_data.intent_sequence.size()]
+	var intent := enemy_data.intent_sequence[current_intent_index % enemy_data.intent_sequence.size()]
+	return intent
 
 func advance_intent() -> void:
 	current_intent_index += 1
@@ -89,6 +104,9 @@ func update_intent_display() -> void:
 	var intent := get_current_intent()
 	var type_val: int = intent.get("type", EnemyData.IntentType.ATTACK)
 	var val: int = intent.get("value", 0)
+
+	if is_enraged:
+		val = int(round(float(val) * 1.4))
 
 	match type_val:
 		EnemyData.IntentType.ATTACK:
@@ -158,9 +176,36 @@ func take_damage(amount: int, is_piercing: bool = false) -> int:
 	update_ui()
 
 	if current_hp <= 0:
-		boss_died.emit(enemy_data)
+		if enemy_data and enemy_data.has_next_stage():
+			_transition_to_next_stage()
+		else:
+			boss_died.emit(enemy_data)
 
 	return actual_hp_damage
+
+func _transition_to_next_stage() -> void:
+	var _next_st := enemy_data.advance_to_next_stage()
+	max_hp = enemy_data.max_hp
+	current_hp = max_hp
+	current_shield = enemy_data.starting_shield
+	current_intent_index = 0
+	is_enraged = false
+
+	# Dramatic phase transition visuals & audio
+	AudioSynth.play_emp()
+	avatar_label.text = enemy_data.avatar_glyph
+	name_label.text = "⚡ " + enemy_data.display_name
+	name_label.modulate = Color(1.0, 0.2, 0.5)
+
+	var tween := create_tween().set_parallel(true)
+	hit_flash.modulate.a = 0.9
+	tween.tween_property(hit_flash, "modulate:a", 0.0, 0.5)
+	avatar_label.scale = Vector2(1.5, 1.5)
+	tween.tween_property(avatar_label, "scale", Vector2(1.0, 1.0), 0.35).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+
+	update_ui()
+	update_intent_display()
+	stage_transitioned.emit(enemy_data, enemy_data.current_stage_index)
 
 func _trigger_enrage() -> void:
 	is_enraged = true
@@ -170,6 +215,7 @@ func _trigger_enrage() -> void:
 	if _base_style:
 		_base_style.border_color = Color(1.0, 0.1, 0.25)
 		_base_style.shadow_color = Color(1.0, 0.0, 0.2, 0.6)
+	update_intent_display()
 
 func add_shield(amount: int) -> void:
 	current_shield += amount
@@ -215,24 +261,22 @@ func tick_spin_virus_status() -> int:
 
 func _play_hit_reaction() -> void:
 	AudioSynth.play_boss_hit()
-
-	# Hit flash
-	var flash_tween := create_tween()
+	var tween := create_tween()
 	hit_flash.modulate.a = 0.7
-	flash_tween.tween_property(hit_flash, "modulate:a", 0.0, 0.25)
+	tween.tween_property(hit_flash, "modulate:a", 0.0, 0.25)
 
-	# Dynamic squash & stretch punch
-	var punch_tween := create_tween()
-	punch_tween.tween_property(avatar_label, "scale", Vector2(1.25, 0.8), 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	punch_tween.tween_property(avatar_label, "scale", Vector2(0.9, 1.15), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	punch_tween.tween_property(avatar_label, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-
-	# Subtle knockback shake
+	# Dynamic squash & stretch + knockback shake
+	var orig_pos := Vector2.ZERO
 	var shake_offset := Vector2(randf_range(-6.0, 6.0), randf_range(-4.0, 4.0))
-	var knockback_tween := create_tween()
-	knockback_tween.tween_property(avatar_label, "position", shake_offset, 0.05)
-	knockback_tween.tween_property(avatar_label, "position", Vector2.ZERO, 0.05)
-	knockback_tween.tween_callback(_start_breathing_animation)
+
+	var anim_tween := create_tween()
+	anim_tween.tween_property(avatar_label, "scale", Vector2(1.25, 0.8), 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	anim_tween.parallel().tween_property(avatar_label, "position", orig_pos + shake_offset, 0.05)
+
+	anim_tween.tween_property(avatar_label, "scale", Vector2(0.9, 1.15), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	anim_tween.parallel().tween_property(avatar_label, "position", orig_pos, 0.08)
+
+	anim_tween.tween_property(avatar_label, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 func reset_boss_visuals() -> void:
 	is_enraged = false
@@ -240,7 +284,6 @@ func reset_boss_visuals() -> void:
 	virus_stacks = 0
 	emp_stacks = 0
 	glitch_stacks = 0
-
 	avatar_label.scale = Vector2.ONE
 	avatar_label.position = Vector2.ZERO
 	hit_flash.modulate.a = 0.0
@@ -251,17 +294,11 @@ func reset_boss_visuals() -> void:
 		if _base_style:
 			_base_style.border_color = enemy_data.theme_color
 			_base_style.shadow_color = Color(enemy_data.theme_color.r, enemy_data.theme_color.g, enemy_data.theme_color.b, 0.4)
-	else:
-		if _base_style:
-			_base_style.border_color = Color(1.0, 0.1, 0.35, 0.9)
-			_base_style.shadow_color = Color(1.0, 0.0, 0.3, 0.4)
 
 	update_ui()
-	_start_breathing_animation()
+	update_intent_display()
 
 func _start_breathing_animation() -> void:
-	if _breathing_tween and _breathing_tween.is_valid():
-		_breathing_tween.kill()
-	_breathing_tween = create_tween().set_loops()
-	_breathing_tween.tween_property(avatar_label, "position:y", -3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_breathing_tween.tween_property(avatar_label, "position:y", 3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var tween := create_tween().set_loops()
+	tween.tween_property(avatar_label, "position:y", -3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(avatar_label, "position:y", 3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

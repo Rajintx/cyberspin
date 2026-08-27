@@ -27,6 +27,7 @@ func _ready() -> void:
 	orbital_slot_machine.spin_requested.connect(_on_spin_requested)
 	orbital_slot_machine.spin_completed.connect(_on_spin_completed)
 	boss_core.boss_died.connect(_on_boss_died)
+	boss_core.stage_transitioned.connect(_on_stage_transitioned)
 
 	pip_button.pressed.connect(func():
 		AudioSynth.play_click()
@@ -65,22 +66,6 @@ func start_combat(enemy: EnemyData) -> void:
 	_log("[color=#8888aa]\"%s\"[/color]" % enemy.flavor_quote)
 	_update_all_hud()
 
-func reset_combat_visuals() -> void:
-	if boss_core:
-		boss_core.reset_boss_visuals()
-	if log_label:
-		log_label.clear()
-	for node in get_tree().get_nodes_in_group("floating_text"):
-		if is_instance_valid(node):
-			node.queue_free()
-	if player_shield_bar:
-		player_shield_bar.visible = false
-	if orbital_slot_machine:
-		orbital_slot_machine.clear_all_hazards()
-		orbital_slot_machine.clear_all_corruptions()
-		orbital_slot_machine.reset_machine_visuals()
-		_on_spin_cost_changed(RunState.get_current_spin_cost(), RunState.battle_turn_number)
-
 func _update_all_hud() -> void:
 	_on_bankroll_changed(RunState.credits, RunState.max_bankroll_seen)
 	_on_shield_changed(RunState.player_shield)
@@ -117,6 +102,12 @@ func _on_relics_updated(relic_list: Array[RelicData]) -> void:
 		lbl.mouse_filter = Control.MOUSE_FILTER_STOP
 		lbl.add_theme_font_size_override("font_size", 18)
 		relic_container.add_child(lbl)
+
+func _on_stage_transitioned(enemy: EnemyData, stage_idx: int) -> void:
+	_log("[color=#ff0055]⚡ PHASE TRANSITION: %s ENTERED STAGE %d! [/color]" % [enemy.display_name, stage_idx + 1])
+	orbital_slot_machine.show_banner("⚡ PHASE %d: %s" % [stage_idx + 1, enemy.display_name])
+	floor_label.text = "FLOOR %d/10 // %s" % [RunState.current_floor, enemy.display_name.to_upper()]
+	trigger_screen_shake(6.0)
 
 func _on_spin_requested() -> void:
 	# Tick Virus damage on spin
@@ -205,11 +196,11 @@ func _resolve_tile_hazards() -> void:
 	for i in range(8):
 		var tile: SlotTile = orbital_slot_machine.slot_tiles[i]
 		if tile.hazard_type == SlotTile.HazardType.SPIKE:
-			total_spike_dmg += 6 + int(floor(float(RunState.current_floor) / 2.0))
+			total_spike_dmg += 10 + RunState.current_floor
 			tile.play_hazard_trigger_fx()
 			tile.clear_hazard() # Spike pops after trigger
 		elif tile.hazard_type == SlotTile.HazardType.POISON:
-			total_poison_drain += 3 + int(floor(float(RunState.current_floor) / 3.0))
+			total_poison_drain += 5 + int(floor(float(RunState.current_floor) / 2.0))
 			tile.play_hazard_trigger_fx()
 
 	if total_spike_dmg > 0:
@@ -242,9 +233,8 @@ func _execute_boss_turn() -> void:
 	var hits: int = intent.get("hits", 1)
 	var intent_name: String = intent.get("name", "Action")
 
-	# If enraged, bonus value
 	if boss_core.is_enraged:
-		val += 2
+		val = int(round(float(val) * 1.4))
 
 	match type_val:
 		EnemyData.IntentType.PLANT_SPIKES:
@@ -274,13 +264,16 @@ func _execute_boss_turn() -> void:
 
 	boss_core.advance_intent()
 
-	# C. Advance Battle Turn & Passive RAM Pulse (every 3 turns)
-	RunState.start_new_battle_turn()
-	if RunState.battle_turn_number % 3 == 0:
-		RunState.restore_ram(1)
-		spawn_floating_text("+1 💾 RAM PULSE", Color(0.2, 1.0, 0.5), ram_label.global_position)
-		_log("[color=#33ff66]⚡ System Pulse: Restored +1 RAM.[/color]")
+	# C. 50% Active Shield Decay at Turn End
+	if RunState.player_shield > 0:
+		var decayed_shield := int(floor(float(RunState.player_shield) * 0.5))
+		var lost := RunState.player_shield - decayed_shield
+		RunState.set_shield(decayed_shield)
+		if lost > 0:
+			_log("[color=#4477aa]🛡️ Firewall Dissipated: -%d Shield (50%% Turn Decay).[/color]" % lost)
 
+	# D. Advance Battle Turn
+	RunState.start_new_battle_turn()
 	is_resolving_turn = false
 
 	# Re-enable player controls for next spin if player still alive
@@ -310,7 +303,6 @@ func _apply_damage_to_player(amount: int) -> void:
 	else:
 		spawn_floating_text("🛡️ BLOCKED", Color(0.3, 0.9, 1.0), player_hp_bar.global_position + Vector2(20, -10))
 		_log("[color=#00ccff]🛡️ Firewall absorbed all incoming damage![/color]")
-		# Plasma converter check
 		if RunState.has_relic(RelicData.RelicType.PLASMA_CONVERTER) and RunState.player_shield > 0:
 			var reflected := int(round(RunState.player_shield * 0.3))
 			if reflected > 0:
@@ -368,6 +360,13 @@ func trigger_screen_shake(intensity: float = 4.0) -> void:
 		var offset := Vector2(randf_range(-intensity, intensity), randf_range(-intensity, intensity))
 		tween.tween_property(orbital_slot_machine, "position", original_pos + offset, 0.03)
 	tween.tween_property(orbital_slot_machine, "position", original_pos, 0.03)
+
+func reset_combat_visuals() -> void:
+	log_label.text = ""
+	for node in get_tree().get_nodes_in_group("floating_text"):
+		node.queue_free()
+	player_shield_bar.visible = false
+	boss_core.reset_boss_visuals()
 
 func _log(bbcode: String) -> void:
 	log_label.append_text(bbcode + "\n")

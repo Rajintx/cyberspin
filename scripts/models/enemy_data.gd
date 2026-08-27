@@ -14,42 +14,38 @@ enum IntentType {
 
 @export var id: String = "sec_drone"
 @export var display_name: String = "V-9 Patrol Drone"
-@export var max_hp: int = 70
-@export var starting_shield: int = 15
+@export var max_hp: int = 50
+@export var starting_shield: int = 10
 @export var avatar_glyph: String = "🤖"
 @export var theme_color: Color = Color(0.0, 0.85, 1.0)
 @export var is_boss: bool = false
 @export var is_elite: bool = false
-@export var credits_reward: int = 35
+@export var credits_reward: int = 18
 @export_multiline var flavor_quote: String = "UNAUTHORIZED TERMINAL ACCESS DETECTED."
 
-@export var intent_sequence: Array[Dictionary] = [
-	{
-		"type": IntentType.PLANT_SPIKES,
-		"value": 1,
-		"hits": 1,
-		"name": "Spike Emitter",
-		"desc": "Arms 1 orbital slot with a 📌 Data Spike (10 DMG on landing)."
-	},
-	{
-		"type": IntentType.SHIELD_UP,
-		"value": 14,
-		"hits": 1,
-		"name": "Deflection Matrix",
-		"desc": "Deploys +14 Firewall Shield."
-	},
-	{
-		"type": IntentType.INJECT_POISON,
-		"value": 1,
-		"hits": 1,
-		"name": "Malware Worm",
-		"desc": "Infects 1 orbital slot with ☣️ Poison (drains 6 Credits/turn)."
-	},
-	{
-		"type": IntentType.ATTACK,
-		"value": 12,
-		"hits": 1,
-		"name": "Charged Blaster",
-		"desc": "Fires a 12 DMG Cyber Laser."
-	}
-]
+@export var intent_sequence: Array[Dictionary] = []
+@export var stages: Array[Dictionary] = []
+var current_stage_index: int = 0
+
+func has_stages() -> bool:
+	return not stages.is_empty()
+
+func has_next_stage() -> bool:
+	return has_stages() and (current_stage_index < stages.size() - 1)
+
+func get_current_stage_data() -> Dictionary:
+	if has_stages() and current_stage_index < stages.size():
+		return stages[current_stage_index]
+	return {}
+
+func advance_to_next_stage() -> Dictionary:
+	if has_next_stage():
+		current_stage_index += 1
+		var next_st: Dictionary = stages[current_stage_index]
+		display_name = next_st.get("name", display_name)
+		avatar_glyph = next_st.get("avatar", avatar_glyph)
+		max_hp = next_st.get("hp", max_hp)
+		starting_shield = next_st.get("shield", starting_shield)
+		intent_sequence = next_st.get("intents", intent_sequence)
+		return next_st
+	return {}

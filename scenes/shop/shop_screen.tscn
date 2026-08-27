@@ -111,12 +111,21 @@ alignment = 1
 
 [node name="ServicesBar" type="HBoxContainer" parent="Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 alignment = 1
+
+[node name="ExpandRamBtn" type="Button" parent="Margin/VBox/ServicesBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 36)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
+text = "💾 +1 RAM (50💳)"
 
 [node name="RestockBtn" type="Button" parent="Margin/VBox/ServicesBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 36)
+custom_minimum_size = Vector2(150, 36)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.8, 0.5, 1, 1)
@@ -125,16 +134,16 @@ text = "🎲 RESTOCK (15💳)"
 
 [node name="HealButton" type="Button" parent="Margin/VBox/ServicesBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(190, 36)
+custom_minimum_size = Vector2(170, 36)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.2, 0.9, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
-text = "RESTORE 25 HP (20💳)"
+text = "RESTORE 15 HP (18💳)"
 
 [node name="PurgeButton" type="Button" parent="Margin/VBox/ServicesBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(190, 36)
+custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
@@ -142,12 +151,12 @@ text = "PURGE CHIP (25💳)"
 
 [node name="LeaveButton" type="Button" parent="Margin/VBox/ServicesBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(150, 36)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.2, 1, 0.6, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
-text = "CONTINUE RUN ➔"
+text = "CONTINUE ➔"
 
 [node name="PurgeModal" type="PanelContainer" parent="."]
 unique_name_in_owner = true
