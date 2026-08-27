@@ -310,30 +310,30 @@ func _build_master_libraries() -> void:
 func _build_10_floor_enemies() -> void:
 	all_enemy_library.clear()
 
-	# Floor 1: Sector Patrol Drone (200 HP, 10 Shield, 18 💳 Bounty)
+	# Floor 1: Sector Patrol Drone (500 HP, 15 Shield, 18 💳 Bounty)
 	var f1 := EnemyData.new()
 	f1.id = "sec_drone"
 	f1.display_name = "V-9 Patrol Drone"
-	f1.max_hp = 200
-	f1.starting_shield = 10
+	f1.max_hp = 500
+	f1.starting_shield = 15
 	f1.avatar_glyph = "🤖"
 	f1.theme_color = Color(0.0, 0.85, 1.0)
 	f1.credits_reward = 18
 	f1.flavor_quote = "SCANNING SECTOR... PIRATE TERMINAL ISOLATED."
 	f1.intent_sequence = [
 		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 1, "name": "Spike Emitter", "desc": "Plants 1 📌 Data Spike (11 DMG on landing)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 10, "name": "Deflection Matrix", "desc": "Deploys +10 Shield."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 15, "name": "Deflection Matrix", "desc": "Deploys +15 Shield."},
 		{"type": EnemyData.IntentType.INJECT_POISON, "value": 1, "name": "Malware Worm", "desc": "Plants 1 ☣️ Poison trap (drains 5 Credits/turn)."},
 		{"type": EnemyData.IntentType.ATTACK, "value": 9, "name": "Pulse Blaster", "desc": "Fires a 9 DMG Cyber Laser."}
 	]
 	all_enemy_library.append(f1)
 
-	# Floor 2: Security Enforcer Mech (300 HP, 15 Shield, 28 💳 Bounty)
+	# Floor 2: Security Enforcer Mech (750 HP, 20 Shield, 28 💳 Bounty)
 	var f2 := EnemyData.new()
 	f2.id = "corp_enforcer"
 	f2.display_name = "Sector Enforcer Mech"
-	f2.max_hp = 300
-	f2.starting_shield = 15
+	f2.max_hp = 750
+	f2.starting_shield = 20
 	f2.avatar_glyph = "🦿"
 	f2.theme_color = Color(0.2, 0.6, 1.0)
 	f2.credits_reward = 28
@@ -342,35 +342,35 @@ func _build_10_floor_enemies() -> void:
 		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 1, "name": "Spike Minefield", "desc": "Plants 1 📌 Data Spike (12 DMG)."},
 		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 4, "hits": 3, "name": "Burst Fire", "desc": "Fires 3 rapid lasers (3x 4 = 12 DMG)."},
 		{"type": EnemyData.IntentType.INJECT_POISON, "value": 1, "name": "Toxic Gas Vent", "desc": "Infects 1 slot with ☣️ Poison (6 CR/turn)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 15, "name": "Heavy Plating", "desc": "Deploys +15 Armor."}
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 20, "name": "Heavy Plating", "desc": "Deploys +20 Armor."}
 	]
 	all_enemy_library.append(f2)
 
-	# Floor 3: Cyber-Viper AI (460 HP, 25 Shield, 42 💳 Bounty)
+	# Floor 3: [ELITE] Cyber-Viper AI (5,750 HP [50x], 125 Shield, 5x DMG, 42 💳 Bounty)
 	var f3 := EnemyData.new()
 	f3.id = "cyber_viper"
-	f3.display_name = "Sub-Routine Cyber-Viper"
-	f3.max_hp = 460
-	f3.starting_shield = 25
+	f3.display_name = "Sub-Routine Cyber-Viper [ELITE]"
+	f3.max_hp = 5750
+	f3.starting_shield = 125
 	f3.avatar_glyph = "🐍"
 	f3.theme_color = Color(0.9, 0.1, 0.4)
 	f3.is_elite = true
 	f3.credits_reward = 42
 	f3.flavor_quote = "HOSTILE INTEL DETECTED. PURGE PROTOCOL ACTIVE."
 	f3.intent_sequence = [
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Neuro-Venom", "desc": "Infects 2 slots with ☣️ Poison (6 CR/turn)."},
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Net", "desc": "Plants 2 📌 Spikes (13 DMG)!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 3, "name": "Venom Flurry", "desc": "3 rapid strikes (3x 5 = 15 DMG)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 20, "name": "Hardened Shell", "desc": "Deploys +20 Nano-Shield."}
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Neuro-Venom [5x]", "desc": "Infects 2 slots with ☣️ Toxic Plague (30 CR/turn)."},
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Net [5x]", "desc": "Plants 2 📌 Mega Spikes (65 DMG)!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 25, "hits": 3, "name": "Venom Flurry [5x]", "desc": "3 lethal strikes (3x 25 = 75 DMG)!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 100, "name": "Hardened Shell", "desc": "Deploys +100 Nano-Shield."}
 	]
 	all_enemy_library.append(f3)
 
-	# Floor 4: Assault Sentinel Bot (640 HP, 35 Shield, 45 💳 Bounty)
+	# Floor 4: Assault Sentinel Bot (1,600 HP, 40 Shield, 45 💳 Bounty)
 	var f4 := EnemyData.new()
 	f4.id = "assault_bot"
 	f4.display_name = "Assault Tank Sentinel"
-	f4.max_hp = 640
-	f4.starting_shield = 35
+	f4.max_hp = 1600
+	f4.starting_shield = 40
 	f4.avatar_glyph = "🛡️"
 	f4.theme_color = Color(1.0, 0.45, 0.0)
 	f4.credits_reward = 45
@@ -379,172 +379,172 @@ func _build_10_floor_enemies() -> void:
 		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Mine", "desc": "Plants 2 📌 Spikes (14 DMG)!"},
 		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 10, "name": "Shockwave", "desc": "💥 Deals 10 DMG and triggers board hazards!"},
 		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Malware Mist", "desc": "Infects 2 slots with ☣️ Poison (7 CR/turn)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 25, "name": "Fortress Shield", "desc": "Deploys +25 Shield."}
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 35, "name": "Fortress Shield", "desc": "Deploys +35 Shield."}
 	]
 	all_enemy_library.append(f4)
 
-	# Floor 5: ACT 1 APEX MID-BOSS: OVERLORD PRIME (2 Stages, 1,080 HP, 90 💳 Bounty)
+	# Floor 5: [BOSS] OVERLORD PRIME (2 Stages, 13,500 HP Total [50x], 5x DMG, 90 💳 Bounty)
 	var f5 := EnemyData.new()
 	f5.id = "overlord_prime"
-	f5.display_name = "OVERLORD PRIME // STAGE 1"
-	f5.max_hp = 480
-	f5.starting_shield = 30
+	f5.display_name = "OVERLORD PRIME // STAGE 1 [BOSS]"
+	f5.max_hp = 6000
+	f5.starting_shield = 150
 	f5.avatar_glyph = "👁️"
 	f5.theme_color = Color(1.0, 0.05, 0.3)
 	f5.is_boss = true
 	f5.credits_reward = 90
 	f5.flavor_quote = "YOU HAVE BREACHED THE CORE ARCHITECTURE. COMMENCING ERADICATION."
 	f5.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Apex Spike Matrix", "desc": "Plants 2 📌 Spikes (15 DMG)!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 3, "name": "Triad Lasers", "desc": "Fires 3 beams (3x 5 = 15 DMG)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 25, "name": "Fortress Wall", "desc": "Deploys +25 Shield."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Core Malware", "desc": "Infects 2 slots with ☣️ Poison."}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Apex Spike Matrix [5x]", "desc": "Plants 2 📌 Mega Spikes (75 DMG)!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 25, "hits": 3, "name": "Triad Lasers [5x]", "desc": "Fires 3 heavy beams (3x 25 = 75 DMG)!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 125, "name": "Fortress Wall", "desc": "Deploys +125 Shield."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Core Malware [5x]", "desc": "Infects 2 slots with ☣️ Toxic Poison."}
 	]
 	f5.stages = [
 		{
-			"name": "OVERLORD PRIME // STAGE 1",
+			"name": "OVERLORD PRIME // STAGE 1 [BOSS]",
 			"avatar": "👁️",
-			"hp": 480,
-			"shield": 30,
+			"hp": 6000,
+			"shield": 150,
 			"intents": f5.intent_sequence
 		},
 		{
 			"name": "OVERLORD PRIME [STAGE 2: MELTDOWN CORE]",
 			"avatar": "💀",
-			"hp": 600,
-			"shield": 40,
+			"hp": 7500,
+			"shield": 200,
 			"intents": [
-				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Meltdown Spikes", "desc": "Plants 3 📌 Spikes (15 DMG)!"},
-				{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 16, "name": "SYSTEM_DETONATE()", "desc": "💥 Deals 16 DMG and detonates all hazards!"},
-				{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Toxic Overload", "desc": "Infects 2 slots with ☣️ Poison (7 CR/turn)."},
-				{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 6, "hits": 3, "name": "Omega Meltdown Blast", "desc": "3 heavy blasts (3x 6 = 18 DMG)!"}
+				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Meltdown Spikes [5x]", "desc": "Plants 3 📌 Spikes (75 DMG)!"},
+				{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 80, "name": "SYSTEM_DETONATE() [5x]", "desc": "💥 Deals 80 DMG and detonates all hazards!"},
+				{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Toxic Overload [5x]", "desc": "Infects 2 slots with ☣️ Poison (35 CR/turn)."},
+				{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 30, "hits": 3, "name": "Omega Meltdown Blast [5x]", "desc": "3 heavy blasts (3x 30 = 90 DMG)!"}
 			]
 		}
 	]
 	all_enemy_library.append(f5)
 
-	# Floor 6: Quantum Sentinel (1,300 HP, 65 Shield, 75 💳 Bounty)
+	# Floor 6: Quantum Sentinel (3,250 HP, 70 Shield, 75 💳 Bounty)
 	var f6 := EnemyData.new()
 	f6.id = "quantum_sentinel"
 	f6.display_name = "Quantum Phase Sentinel"
-	f6.max_hp = 1300
-	f6.starting_shield = 65
+	f6.max_hp = 3250
+	f6.starting_shield = 70
 	f6.avatar_glyph = "💠"
 	f6.theme_color = Color(0.3, 0.9, 1.0)
 	f6.credits_reward = 75
 	f6.flavor_quote = "TEMPORAL FREQUENCY SHIFTED. COMMENCING RETALIATION."
 	f6.intent_sequence = [
 		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Phase Spikes", "desc": "Plants 2 📌 Spikes (16 DMG)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 35, "name": "Quantum Barrier", "desc": "Deploys +35 Barrier Shield."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 50, "name": "Quantum Barrier", "desc": "Deploys +50 Barrier Shield."},
 		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Phase Poison", "desc": "Infects 2 slots with ☣️ Poison (8 CR/turn)."},
 		{"type": EnemyData.IntentType.ATTACK, "value": 18, "name": "Disruptor Lance", "desc": "Deals 18 Cyber Damage."}
 	]
 	all_enemy_library.append(f6)
 
-	# Floor 7: Nano-Swarm Hivemind (1,900 HP, 95 Shield, 100 💳 Bounty)
+	# Floor 7: [ELITE] Nano-Swarm Hivemind (23,750 HP [50x], 475 Shield, 5x DMG, 100 💳 Bounty)
 	var f7 := EnemyData.new()
 	f7.id = "nano_swarm"
-	f7.display_name = "Nano-Swarm Hivemind AI"
-	f7.max_hp = 1900
-	f7.starting_shield = 95
+	f7.display_name = "Nano-Swarm Hivemind AI [ELITE]"
+	f7.max_hp = 23750
+	f7.starting_shield = 475
 	f7.avatar_glyph = "🐝"
 	f7.theme_color = Color(0.8, 0.2, 1.0)
 	f7.is_elite = true
 	f7.credits_reward = 100
 	f7.flavor_quote = "WE ARE MILLIONS. YOUR TERMINAL WILL BE CONSUMED."
 	f7.intent_sequence = [
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 4, "name": "Swarm Barrage", "desc": "4 rapid hits (4x 5 = 20 DMG)."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Nanite Infection", "desc": "Infects 3 slots with ☣️ Poison (8 CR/turn)."},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 25, "hits": 4, "name": "Swarm Barrage [5x]", "desc": "4 rapid hits (4x 25 = 100 DMG)!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Nanite Infection [5x]", "desc": "Infects 3 slots with ☣️ Poison (40 CR/turn)."},
 		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 2, "name": "Swarm Glitch", "desc": "Glitch locks 2 orbital reels!"},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 45, "name": "Nanite Armor", "desc": "Deploys +45 Shield."}
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 225, "name": "Nanite Armor", "desc": "Deploys +225 Shield."}
 	]
 	all_enemy_library.append(f7)
 
-	# Floor 8: Aegis Leviathan Carrier (2,720 HP, 140 Shield, 130 💳 Bounty)
+	# Floor 8: [ELITE] Aegis Leviathan Carrier (34,000 HP [50x], 700 Shield, 5x DMG, 130 💳 Bounty)
 	var f8 := EnemyData.new()
 	f8.id = "aegis_leviathan"
-	f8.display_name = "Aegis Leviathan Dreadnought"
-	f8.max_hp = 2720
-	f8.starting_shield = 140
+	f8.display_name = "Aegis Leviathan Dreadnought [ELITE]"
+	f8.max_hp = 34000
+	f8.starting_shield = 700
 	f8.avatar_glyph = "🛸"
 	f8.theme_color = Color(1.0, 0.4, 0.0)
 	f8.is_elite = true
 	f8.credits_reward = 130
 	f8.flavor_quote = "ALL AIRSPACE RESTRICTED. LETHAL FORCE AUTHORIZED."
 	f8.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Orbital Spikes", "desc": "Plants 3 📌 Spikes (18 DMG)!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 6, "hits": 4, "name": "Gatling Lasers", "desc": "4 heavy laser blasts (4x 6 = 24 DMG)."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Bio-Plague", "desc": "Infects 3 slots with ☣️ Poison (9 CR/turn)."},
-		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 20, "name": "Particle Shockwave", "desc": "💥 Deals 20 DMG and triggers all hazards!"}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Orbital Spikes [5x]", "desc": "Plants 3 📌 Mega Spikes (90 DMG)!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 30, "hits": 4, "name": "Gatling Lasers [5x]", "desc": "4 heavy laser blasts (4x 30 = 120 DMG)!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Bio-Plague [5x]", "desc": "Infects 3 slots with ☣️ Poison (45 CR/turn)."},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 100, "name": "Particle Shockwave [5x]", "desc": "💥 Deals 100 DMG and triggers all hazards!"}
 	]
 	all_enemy_library.append(f8)
 
-	# Floor 9: Corporate Citadel Core (3,920 HP, 190 Shield, 165 💳 Bounty)
+	# Floor 9: [ELITE] Corporate Citadel Core (49,000 HP [50x], 950 Shield, 5x DMG, 165 💳 Bounty)
 	var f9 := EnemyData.new()
 	f9.id = "citadel_core"
-	f9.display_name = "Citadel Command AI"
-	f9.max_hp = 3920
-	f9.starting_shield = 190
+	f9.display_name = "Citadel Command AI [ELITE]"
+	f9.max_hp = 49000
+	f9.starting_shield = 950
 	f9.avatar_glyph = "🏰"
 	f9.theme_color = Color(1.0, 0.15, 0.4)
 	f9.is_elite = true
 	f9.credits_reward = 165
 	f9.flavor_quote = "YOU HAVE BREACHED 9 LAYERS OF SECURITY. THIS IS YOUR FINAL WARNING."
 	f9.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Citadel Spikes", "desc": "Arms 3 slots with 📌 Spikes (19 DMG)!"},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 65, "name": "Command Barrier", "desc": "Deploys +65 Heavy Shield."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Apex Malware", "desc": "Infects 3 slots with ☣️ Poison (9 CR/turn)!"},
-		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 24, "name": "CITADEL_OVERLOAD()", "desc": "💥 Deals 24 DMG and detonates all hazards!"}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Citadel Spikes [5x]", "desc": "Arms 3 slots with 📌 Spikes (95 DMG)!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 325, "name": "Command Barrier", "desc": "Deploys +325 Heavy Shield."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Apex Malware [5x]", "desc": "Infects 3 slots with ☣️ Poison (45 CR/turn)!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 120, "name": "CITADEL_OVERLOAD() [5x]", "desc": "💥 Deals 120 DMG and detonates all hazards!"}
 	]
 	all_enemy_library.append(f9)
 
-	# Floor 10: FINAL OMEGA NEXUS CORE (3 Stages, 6,600 HP, 300 💳 Bounty)
+	# Floor 10: [FINAL BOSS] OMEGA NEXUS CORE (3 Stages, 82,500 HP Total [50x], 5x DMG, 300 💳 Bounty)
 	var f10 := EnemyData.new()
 	f10.id = "omega_nexus"
-	f10.display_name = "OMEGA NEXUS // STAGE 1: CITADEL"
-	f10.max_hp = 1800
-	f10.starting_shield = 100
+	f10.display_name = "OMEGA NEXUS // STAGE 1: CITADEL [BOSS]"
+	f10.max_hp = 22500
+	f10.starting_shield = 500
 	f10.avatar_glyph = "👁️"
 	f10.theme_color = Color(1.0, 0.05, 0.3)
 	f10.is_boss = true
 	f10.credits_reward = 300
 	f10.flavor_quote = "I AM THE GOD-MACHINE. YOUR EXTINCTION HAS BEEN CALCULATED."
 	f10.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Omni-Spike Grid", "desc": "Arms 3 slots with 📌 Data Spikes (20 DMG)!"},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 60, "name": "God-Shield", "desc": "Deploys +60 Barrier."},
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Omni-Spike Grid [5x]", "desc": "Arms 3 slots with 📌 Data Spikes (100 DMG)!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 300, "name": "God-Shield", "desc": "Deploys +300 Barrier."},
 		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 3, "name": "Matrix Lock", "desc": "EMP Locks 3 reels!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 7, "hits": 4, "name": "Citadel Beam", "desc": "4 heavy beams (4x 7 = 28 DMG)."}
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 35, "hits": 4, "name": "Citadel Beam [5x]", "desc": "4 heavy beams (4x 35 = 140 DMG)!"}
 	]
 	f10.stages = [
 		{
-			"name": "OMEGA NEXUS // STAGE 1: CITADEL",
+			"name": "OMEGA NEXUS // STAGE 1: CITADEL [BOSS]",
 			"avatar": "👁️",
-			"hp": 1800,
-			"shield": 100,
+			"hp": 22500,
+			"shield": 500,
 			"intents": f10.intent_sequence
 		},
 		{
 			"name": "OMEGA NEXUS [STAGE 2: NEURAL SINGULARITY]",
 			"avatar": "🌌",
-			"hp": 2200,
-			"shield": 120,
+			"hp": 27500,
+			"shield": 600,
 			"intents": [
-				{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "God-Malware Overwrite", "desc": "Infects 3 slots with ☣️ Poison (10 CR/turn)!"},
-				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Neural Spikes", "desc": "Plants 3 📌 Spikes (20 DMG)!"},
-				{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 8, "hits": 4, "name": "Gatling Singularity", "desc": "4 lasers (4x 8 = 32 DMG)!"},
-				{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 25, "name": "NEURAL_DETONATE()", "desc": "💥 Deals 25 DMG + triggers board hazards!"}
+				{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "God-Malware Overwrite [5x]", "desc": "Infects 3 slots with ☣️ Poison (50 CR/turn)!"},
+				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Neural Spikes [5x]", "desc": "Plants 3 📌 Spikes (100 DMG)!"},
+				{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 40, "hits": 4, "name": "Gatling Singularity [5x]", "desc": "4 lasers (4x 40 = 160 DMG)!"},
+				{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 125, "name": "NEURAL_DETONATE() [5x]", "desc": "💥 Deals 125 DMG + triggers board hazards!"}
 			]
 		},
 		{
 			"name": "OMEGA NEXUS [STAGE 3: THE ARCHITECT]",
 			"avatar": "👑",
-			"hp": 2600,
-			"shield": 150,
+			"hp": 32500,
+			"shield": 750,
 			"intents": [
-				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 4, "name": "Apocalypse Grid", "desc": "Plants 4 📌 Spikes (20 DMG)!"},
-				{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 30, "name": "APOCALYPSE_DETONATE()", "desc": "💥 Deals 30 DMG and detonates all hazards!"},
-				{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 40, "name": "EXECUTE_PURGE()", "desc": "Ultimate Overclock Strike dealing 40 DMG!"},
-				{"type": EnemyData.IntentType.INJECT_POISON, "value": 4, "name": "Reality Dissolution", "desc": "Infects 4 slots with ☣️ Poison!"}
+				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 4, "name": "Apocalypse Grid [5x]", "desc": "Plants 4 📌 Spikes (100 DMG)!"},
+				{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 150, "name": "APOCALYPSE_DETONATE() [5x]", "desc": "💥 Deals 150 DMG and detonates all hazards!"},
+				{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 200, "name": "EXECUTE_PURGE() [5x]", "desc": "Ultimate Overclock Strike dealing 200 DMG!"},
+				{"type": EnemyData.IntentType.INJECT_POISON, "value": 4, "name": "Reality Dissolution [5x]", "desc": "Infects 4 slots with ☣️ Poison!"}
 			]
 		}
 	]
@@ -553,19 +553,19 @@ func _build_10_floor_enemies() -> void:
 func get_mimic_enemy() -> EnemyData:
 	var mimic := EnemyData.new()
 	mimic.id = "trojan_mimic"
-	mimic.display_name = "TROJAN MIMIC MECH"
-	mimic.max_hp = 440
-	mimic.starting_shield = 25
+	mimic.display_name = "TROJAN MIMIC MECH [ELITE]"
+	mimic.max_hp = 5500
+	mimic.starting_shield = 125
 	mimic.avatar_glyph = "📦"
 	mimic.theme_color = Color(0.9, 0.2, 1.0)
 	mimic.is_elite = true
 	mimic.credits_reward = 65
 	mimic.flavor_quote = "SURPRISE AMBUSH: CACHE PROTOCOL DECRYPTED AS LETHAL TROJAN."
 	mimic.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Bite Thorns", "desc": "Plants 2 📌 Spikes on the grid (13 DMG)!"},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Trojan Malware", "desc": "Infects 2 slots with ☣️ Poison (6 CR/turn)!"},
-		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 14, "name": "Cache Detonation", "desc": "💥 Deals 14 DMG and detonates all hazards!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 3, "name": "Chomp Flurry", "desc": "3 rapid bites (3x 5 = 15 DMG)!"}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Bite Thorns [5x]", "desc": "Plants 2 📌 Spikes on the grid (65 DMG)!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Trojan Malware [5x]", "desc": "Infects 2 slots with ☣️ Poison (30 CR/turn)!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 70, "name": "Cache Detonation [5x]", "desc": "💥 Deals 70 DMG and detonates all hazards!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 25, "hits": 3, "name": "Chomp Flurry [5x]", "desc": "3 rapid bites (3x 25 = 75 DMG)!"}
 	]
 	return mimic
 
