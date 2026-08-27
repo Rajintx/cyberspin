@@ -8,6 +8,7 @@ signal speed_changed(speed_mult: float)
 signal deck_updated(deck: Array[SymbolData])
 signal relics_updated(relics: Array[RelicData])
 signal crt_toggled(enabled: bool)
+signal crt_params_changed(intensity: float, curvature: float)
 
 # Singleton reference
 static var instance: Node
@@ -37,6 +38,9 @@ var battle_turn_number: int = 1
 # Game Speed Multiplier (0.6x, 1.0x, 1.5x, 2.5x)
 var game_speed: float = 1.0
 var is_crt_enabled: bool = true
+var crt_level: float = 1.0 # 0.0 (Off) to 2.0 (Heavy Retro)
+var crt_scanline_intensity: float = 0.16
+var crt_curvature: float = 0.025
 
 # Lifetime Run Statistics
 var total_spins: int = 0
@@ -749,8 +753,24 @@ func cycle_game_speed() -> void:
 	speed_changed.emit(game_speed)
 
 func toggle_crt() -> void:
-	is_crt_enabled = not is_crt_enabled
+	set_crt_enabled(not is_crt_enabled)
+
+func set_crt_enabled(enabled: bool) -> void:
+	is_crt_enabled = enabled
 	crt_toggled.emit(is_crt_enabled)
+
+func set_crt_level(lvl: float) -> void:
+	crt_level = clampf(lvl, 0.0, 2.0)
+	if crt_level <= 0.01:
+		is_crt_enabled = false
+		crt_toggled.emit(false)
+	else:
+		if not is_crt_enabled:
+			is_crt_enabled = true
+			crt_toggled.emit(true)
+		crt_scanline_intensity = 0.16 * crt_level
+		crt_curvature = 0.025 * crt_level
+		crt_params_changed.emit(crt_scanline_intensity, crt_curvature)
 
 func add_symbol(s: SymbolData) -> void:
 	symbol_deck.append(s)

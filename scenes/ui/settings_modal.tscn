@@ -1,0 +1,217 @@
+﻿[gd_scene format=3 uid="uid://s3tt1ng5m0d4l"]
+
+[ext_resource type="Script" path="res://scripts/ui/settings_modal.gd" id="1_s1t2u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backdrop"]
+bg_color = Color(0.02, 0.03, 0.06, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.06, 0.08, 0.15, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.85, 1, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0.5, 1, 0.35)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0, 0.75, 1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.7, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="SettingsModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_s1t2u")
+
+[node name="Backdrop" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_backdrop")
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(440, 360)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="TitleBox" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/VBox/TitleBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "⚙️ SYSTEM SETTINGS"
+
+[node name="HSeparator" type="HSeparator" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="SettingsList" type="VBoxContainer" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CrtRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/CrtRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.92, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+text = "📺 CRT Retro Shader"
+
+[node name="CrtToggle" type="CheckButton" parent="Center/Panel/Margin/VBox/SettingsList/CrtRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+button_pressed = true
+
+[node name="CrtLevelRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/CrtLevelRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Scanline & Curve"
+
+[node name="CrtSlider" type="HSlider" parent="Center/Panel/Margin/VBox/SettingsList/CrtLevelRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+focus_mode = 0
+min_value = 10.0
+max_value = 200.0
+step = 5.0
+value = 100.0
+
+[node name="CrtValLabel" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/CrtLevelRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "100%"
+horizontal_alignment = 2
+
+[node name="HSeparator2" type="HSeparator" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+
+[node name="ResolutionRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/ResolutionRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+text = "🖥️ Window Size"
+
+[node name="ResolutionOpt" type="OptionButton" parent="Center/Panel/Margin/VBox/SettingsList/ResolutionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 11
+
+[node name="FullscreenRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/FullscreenRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.92, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+text = "⛶ Fullscreen Mode"
+
+[node name="FullscreenToggle" type="CheckButton" parent="Center/Panel/Margin/VBox/SettingsList/FullscreenRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+
+[node name="OpacityRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/OpacityRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "PiP Window Opacity"
+
+[node name="PipOpacitySlider" type="HSlider" parent="Center/Panel/Margin/VBox/SettingsList/OpacityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+focus_mode = 0
+min_value = 30.0
+max_value = 100.0
+step = 5.0
+value = 95.0
+
+[node name="OpacityValLabel" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/OpacityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "95%"
+horizontal_alignment = 2
+
+[node name="CloseSettingsBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(0.04, 0.06, 0.1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "APPLY & CLOSE"
