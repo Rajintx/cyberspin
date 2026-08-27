@@ -5,68 +5,76 @@ signal lock_toggled(slot_index: int, is_locked: bool)
 
 enum HazardType {
 	NONE,
-	SPIKE,   # 📌 Data Spike: Deals direct damage to Shield/Bankroll upon reel landing!
-	POISON   # ☣️ Malware Leech: Drains bankroll every turn and can infect neighbors!
+	SPIKE,  # 📌 Deals direct damage to Firewall/Bankroll on reel settle
+	POISON  # ☣️ Drains Credits every turn until cleansed
 }
 
 @export var slot_index: int = 0
 
 var current_symbol: SymbolData
 var is_locked: bool = false
-var is_corrupted: bool = false
 var is_spinning: bool = false
+var is_corrupted: bool = false
 var hazard_type: HazardType = HazardType.NONE
 
+@onready var lock_button: Button = %LockButton
 @onready var icon_label: Label = %IconLabel
 @onready var name_label: Label = %NameLabel
 @onready var value_label: Label = %ValueLabel
 @onready var mult_label: Label = %MultLabel
-@onready var lock_button: Button = %LockButton
 @onready var glow_rect: ColorRect = %GlowRect
-@onready var corrupt_overlay: ColorRect = %CorruptOverlay
+@onready var shimmer_overlay: ColorRect = %ShimmerOverlay
 @onready var hazard_overlay: ColorRect = %HazardOverlay
 @onready var hazard_badge: Label = %HazardBadge
+@onready var corrupt_overlay: ColorRect = %CorruptOverlay
 
 var _base_style: StyleBoxFlat
 
 func _ready() -> void:
 	_base_style = get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	add_theme_stylebox_override("panel", _base_style)
+
 	lock_button.toggled.connect(_on_lock_button_toggled)
 	glow_rect.modulate.a = 0.0
-	corrupt_overlay.visible = false
 	hazard_overlay.visible = false
 	hazard_badge.visible = false
+	corrupt_overlay.visible = false
 	mult_label.visible = false
 
-func set_symbol(sym: SymbolData, multiplier: float = 1.0) -> void:
+func _on_lock_button_toggled(button_pressed: bool) -> void:
+	if is_corrupted:
+		lock_button.button_pressed = true
+		return
+	is_locked = button_pressed
+	lock_button.text = "🔒" if is_locked else "🔓"
+	_update_border_color(Color(1.0, 0.85, 0.2) if is_locked else (current_symbol.icon_color if current_symbol else Color.WHITE))
+	lock_toggled.emit(slot_index, is_locked)
+
+func set_symbol(sym: SymbolData, calculated_mult: float = 1.0) -> void:
 	current_symbol = sym
 	if sym == null:
 		icon_label.text = "·"
 		name_label.text = "EMPTY"
 		value_label.text = ""
 		mult_label.visible = false
-		tooltip_text = ""
-		_update_border_color(Color(0.2, 0.2, 0.3, 0.4))
 		return
 
 	icon_label.text = sym.icon_glyph
-	icon_label.modulate = sym.icon_color
 	name_label.text = sym.display_name
 	name_label.modulate = sym.icon_color
 
-	if multiplier > 1.05:
-		var eff_val: int = int(round(sym.base_chips * multiplier))
-		if sym.mult_add > 0.0:
-			value_label.text = "%d (+%.0fM)" % [eff_val, sym.mult_add]
-		else:
-			value_label.text = "%d" % eff_val
-		mult_label.text = "x%.1f" % multiplier
+	if calculated_mult > 1.0:
 		mult_label.visible = true
-		value_label.modulate = Color(1.0, 0.9, 0.2)
+		mult_label.text = "x%.1f" % calculated_mult
+		value_label.text = "%d" % int(round(sym.base_chips * calculated_mult))
+		value_label.modulate = Color(1.0, 0.9, 0.3)
 	else:
-		if sym.mult_add > 0.0:
-			value_label.text = "%d (+%.0fM)" % [sym.base_chips, sym.mult_add]
+		if sym.symbol_type == SymbolData.SymbolType.RAM:
+			value_label.text = "+%d 💾" % sym.base_chips
+		elif sym.symbol_type == SymbolData.SymbolType.BATTERY:
+			value_label.text = "+50%"
+		elif sym.symbol_type == SymbolData.SymbolType.MINER:
+			value_label.text = "+%d 💳" % sym.base_chips
 		else:
 			value_label.text = "%d" % sym.base_chips
 		mult_label.visible = false
@@ -118,9 +126,9 @@ func _update_tooltip() -> void:
 		]
 
 	if hazard_type == HazardType.SPIKE:
-		base_tip += "\n\n⚠️ [📌 SPIKE TRAP ARMED]\nWhen reel settles here, triggers 10 direct damage to Firewall/Bankroll!"
+		base_tip += "\n\n⚠️ [📌 SPIKE TRAP ARMED]\nWhen reel settles here, triggers direct damage to Firewall/Bankroll!"
 	elif hazard_type == HazardType.POISON:
-		base_tip += "\n\n☣️ [MALWARE POISON INFESTATION]\nDrains 6 Credits on each turn and may spread to adjacent reels!"
+		base_tip += "\n\n☣️ [MALWARE POISON INFESTATION]\nDrains Credits on each turn until cleansed!"
 
 	tooltip_text = base_tip
 
@@ -134,19 +142,22 @@ func play_spin_animation(final_sym: SymbolData, delay: float = 0.0) -> void:
 		return
 
 	is_spinning = true
+	var spd := RunState.game_speed
 	var tween := create_tween()
 	if delay > 0:
 		tween.tween_interval(delay)
 
-	# Spinning blur tick sequence
-	for i in range(5):
+	# Decelerating 7-step spin tick sequence
+	var intervals: Array[float] = [0.06, 0.07, 0.08, 0.10, 0.13, 0.17, 0.22]
+	for i in range(intervals.size()):
+		var step_dur: float = intervals[i] / spd
 		tween.tween_callback(func():
-			var dummy_glyph: String = ["⚡", "🛡️", "💾", "🔋", "🔥", "☣️", "7️⃣"][randi() % 7]
+			var dummy_glyph: String = ["⚡", "🛡️", "💾", "🔋", "🔥", "☣️", "7️⃣", "💎"][randi() % 8]
 			icon_label.text = dummy_glyph
 			icon_label.modulate = Color(randf_range(0.4, 1.0), randf_range(0.4, 1.0), 1.0)
 			AudioSynth.play_spin_tick()
 		)
-		tween.tween_interval(0.06 + (i * 0.02))
+		tween.tween_interval(step_dur)
 
 	# Land and set final
 	tween.tween_callback(func():
@@ -179,27 +190,20 @@ func set_corrupted(corrupted: bool) -> void:
 	if corrupted:
 		is_locked = true
 		lock_button.button_pressed = true
-		name_label.text = "GLITCHED"
-		_update_border_color(Color(1.0, 0.0, 0.4))
-	else:
-		is_locked = false
-		lock_button.button_pressed = false
-		if current_symbol:
-			set_symbol(current_symbol)
+		lock_button.text = "⚡"
 
-func set_locked(locked: bool) -> void:
-	is_locked = locked
-	lock_button.set_pressed_no_signal(locked)
-	if locked:
-		lock_button.text = "🔒"
-		lock_button.modulate = Color(1.0, 0.8, 0.0)
-	else:
-		lock_button.text = "🔓"
-		lock_button.modulate = Color(0.6, 0.6, 0.7)
-
-func _on_lock_button_toggled(toggled_on: bool) -> void:
-	if is_corrupted or is_spinning:
-		lock_button.set_pressed_no_signal(is_locked)
-		return
-	AudioSynth.play_click()
-	lock_toggled.emit(slot_index, toggled_on)
+func reset_tile_visuals() -> void:
+	is_locked = false
+	is_spinning = false
+	is_corrupted = false
+	hazard_type = HazardType.NONE
+	lock_button.button_pressed = false
+	lock_button.disabled = false
+	lock_button.text = "🔓"
+	glow_rect.modulate.a = 0.0
+	hazard_overlay.visible = false
+	hazard_badge.visible = false
+	corrupt_overlay.visible = false
+	mult_label.visible = false
+	scale = Vector2.ONE
+	_update_visual_styling()

@@ -53,6 +53,7 @@ func start_combat(enemy: EnemyData) -> void:
 	if RunState.has_relic(RelicData.RelicType.RELOAD_CAPACITOR):
 		RunState.restore_ram(RunState.max_ram)
 
+	reset_combat_visuals()
 	boss_core.init_enemy(enemy)
 	orbital_slot_machine.clear_all_hazards()
 	orbital_slot_machine.clear_all_corruptions()
@@ -63,6 +64,22 @@ func start_combat(enemy: EnemyData) -> void:
 	_log("[color=#00f0ff]=== ENGAGING ENEMY: %s ===[/color]" % enemy.display_name)
 	_log("[color=#8888aa]\"%s\"[/color]" % enemy.flavor_quote)
 	_update_all_hud()
+
+func reset_combat_visuals() -> void:
+	if boss_core:
+		boss_core.reset_boss_visuals()
+	if log_label:
+		log_label.clear()
+	for node in get_tree().get_nodes_in_group("floating_text"):
+		if is_instance_valid(node):
+			node.queue_free()
+	if player_shield_bar:
+		player_shield_bar.visible = false
+	if orbital_slot_machine:
+		orbital_slot_machine.clear_all_hazards()
+		orbital_slot_machine.clear_all_corruptions()
+		orbital_slot_machine.reset_machine_visuals()
+		_on_spin_cost_changed(RunState.get_current_spin_cost(), RunState.battle_turn_number)
 
 func _update_all_hud() -> void:
 	_on_bankroll_changed(RunState.credits, RunState.max_bankroll_seen)
@@ -336,6 +353,7 @@ func spawn_floating_text(text: String, color: Color, spawn_pos: Vector2) -> void
 	lbl.modulate = color
 	lbl.global_position = spawn_pos
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.add_to_group("floating_text")
 	add_child(lbl)
 
 	var tween := create_tween().set_parallel(true)

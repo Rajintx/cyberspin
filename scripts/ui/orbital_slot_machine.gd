@@ -199,7 +199,14 @@ func _on_spin_cost_changed(cost: int, turn_num: int) -> void:
 		bet_toggle_btn.modulate = Color(1.0, 0.2, 0.5)
 
 func _on_speed_changed(spd: float) -> void:
-	speed_toggle_btn.text = "⏩ %.1fX" % spd
+	if spd <= 0.6:
+		speed_toggle_btn.text = "⏩ 0.6X (SLOW)"
+	elif spd <= 1.0:
+		speed_toggle_btn.text = "⏩ 1.0X (NORM)"
+	elif spd <= 1.5:
+		speed_toggle_btn.text = "⏩ 1.5X (FAST)"
+	else:
+		speed_toggle_btn.text = "⏩ 2.5X (TURBO)"
 
 func show_banner(text: String) -> void:
 	info_banner.text = text
@@ -212,6 +219,11 @@ func set_slot_hazard(slot_index: int, hazard: SlotTile.HazardType) -> void:
 	if slot_index >= 0 and slot_index < 8:
 		slot_tiles[slot_index].set_hazard(hazard)
 
+func set_slot_corrupted(slot_index: int, corrupted: bool) -> void:
+	if slot_index >= 0 and slot_index < 8:
+		corrupted_indices[slot_index] = corrupted
+		slot_tiles[slot_index].set_corrupted(corrupted)
+
 func clear_all_hazards() -> void:
 	for i in range(8):
 		slot_tiles[i].clear_hazard()
@@ -220,6 +232,17 @@ func clear_all_corruptions() -> void:
 	for i in range(8):
 		corrupted_indices[i] = false
 		slot_tiles[i].set_corrupted(false)
+
+func reset_machine_visuals() -> void:
+	for tile in slot_tiles:
+		if tile:
+			tile.reset_tile_visuals()
+	for i in range(8):
+		locked_indices[i] = false
+		corrupted_indices[i] = false
+	_active_lines_to_draw.clear()
+	payline_canvas.queue_redraw()
+	lever_handle.position = _lever_initial_pos
 
 func _on_spin_button_pressed() -> void:
 	pull_lever_and_spin()
@@ -247,7 +270,7 @@ func pull_lever_and_spin() -> void:
 	AudioSynth.play_lever_pull()
 	var lever_tween := create_tween()
 	lever_tween.tween_property(lever_handle, "position:y", _lever_initial_pos.y + 40.0, 0.12 / spd).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	lever_tween.tween_property(lever_handle, "position:y", _lever_initial_pos.y, 0.2 / spd).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	lever_tween.tween_property(lever_handle, "position:y", _lever_initial_pos.y, 0.22 / spd).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 
 	spin_requested.emit()
 	_execute_spin_visuals(true)
@@ -275,10 +298,10 @@ func _execute_spin_visuals(trigger_combat: bool) -> void:
 	# Stagger reel spin animations clockwise around the ring
 	for i in range(8):
 		if not locked_indices[i] and not corrupted_indices[i]:
-			slot_tiles[i].play_spin_animation(new_symbols[i], (i * 0.04) / spd)
+			slot_tiles[i].play_spin_animation(new_symbols[i], (i * 0.07) / spd)
 
 	# Evaluate after all reels land
-	var eval_timer := get_tree().create_timer((0.5 + (8 * 0.04)) / spd)
+	var eval_timer := get_tree().create_timer((0.85 + (8 * 0.07)) / spd)
 	eval_timer.timeout.connect(func():
 		_on_reels_settled(new_symbols, trigger_combat)
 	)

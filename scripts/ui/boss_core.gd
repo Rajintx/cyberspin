@@ -34,6 +34,7 @@ var current_intent_index: int = 0
 @onready var hit_flash: ColorRect = %HitFlash
 
 var _base_style: StyleBoxFlat
+var _breathing_tween: Tween
 
 func _ready() -> void:
 	_base_style = get_theme_stylebox("panel").duplicate() as StyleBoxFlat
@@ -47,22 +48,9 @@ func init_enemy(data: EnemyData) -> void:
 	current_hp = max_hp
 	current_shield = data.starting_shield
 	current_intent_index = 0
-	is_enraged = false
-
-	overheat_stacks = 0
-	virus_stacks = 0
-	emp_stacks = 0
-	glitch_stacks = 0
 
 	avatar_label.text = data.avatar_glyph
-	name_label.text = data.display_name
-	name_label.modulate = data.theme_color
-
-	if _base_style:
-		_base_style.border_color = data.theme_color
-		_base_style.shadow_color = Color(data.theme_color.r, data.theme_color.g, data.theme_color.b, 0.4)
-
-	update_ui()
+	reset_boss_visuals()
 	update_intent_display()
 
 func update_ui() -> void:
@@ -227,13 +215,53 @@ func tick_spin_virus_status() -> int:
 
 func _play_hit_reaction() -> void:
 	AudioSynth.play_boss_hit()
-	var tween := create_tween().set_parallel(true)
+
+	# Hit flash
+	var flash_tween := create_tween()
 	hit_flash.modulate.a = 0.7
-	tween.tween_property(hit_flash, "modulate:a", 0.0, 0.25)
-	avatar_label.scale = Vector2(1.25, 1.25)
-	tween.tween_property(avatar_label, "scale", Vector2(1.0, 1.0), 0.2).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	flash_tween.tween_property(hit_flash, "modulate:a", 0.0, 0.25)
+
+	# Dynamic squash & stretch punch
+	var punch_tween := create_tween()
+	punch_tween.tween_property(avatar_label, "scale", Vector2(1.25, 0.8), 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	punch_tween.tween_property(avatar_label, "scale", Vector2(0.9, 1.15), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	punch_tween.tween_property(avatar_label, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+	# Subtle knockback shake
+	var shake_offset := Vector2(randf_range(-6.0, 6.0), randf_range(-4.0, 4.0))
+	var knockback_tween := create_tween()
+	knockback_tween.tween_property(avatar_label, "position", shake_offset, 0.05)
+	knockback_tween.tween_property(avatar_label, "position", Vector2.ZERO, 0.05)
+	knockback_tween.tween_callback(_start_breathing_animation)
+
+func reset_boss_visuals() -> void:
+	is_enraged = false
+	overheat_stacks = 0
+	virus_stacks = 0
+	emp_stacks = 0
+	glitch_stacks = 0
+
+	avatar_label.scale = Vector2.ONE
+	avatar_label.position = Vector2.ZERO
+	hit_flash.modulate.a = 0.0
+
+	if enemy_data:
+		name_label.text = enemy_data.display_name
+		name_label.modulate = enemy_data.theme_color
+		if _base_style:
+			_base_style.border_color = enemy_data.theme_color
+			_base_style.shadow_color = Color(enemy_data.theme_color.r, enemy_data.theme_color.g, enemy_data.theme_color.b, 0.4)
+	else:
+		if _base_style:
+			_base_style.border_color = Color(1.0, 0.1, 0.35, 0.9)
+			_base_style.shadow_color = Color(1.0, 0.0, 0.3, 0.4)
+
+	update_ui()
+	_start_breathing_animation()
 
 func _start_breathing_animation() -> void:
-	var tween := create_tween().set_loops()
-	tween.tween_property(avatar_label, "position:y", -3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(avatar_label, "position:y", 3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if _breathing_tween and _breathing_tween.is_valid():
+		_breathing_tween.kill()
+	_breathing_tween = create_tween().set_loops()
+	_breathing_tween.tween_property(avatar_label, "position:y", -3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_breathing_tween.tween_property(avatar_label, "position:y", 3.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

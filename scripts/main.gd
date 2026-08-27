@@ -12,6 +12,7 @@ extends Control
 @onready var stats_summary: Label = %StatsSummary
 @onready var restart_button: Button = %RestartButton
 @onready var pip_overlay: PiPOverlay = %PiPOverlay
+@onready var crt_overlay: ColorRect = %CRTOverlay
 
 func _ready() -> void:
 	character_select.specialist_chosen.connect(_on_specialist_chosen)
@@ -23,6 +24,11 @@ func _ready() -> void:
 	restart_button.pressed.connect(_on_restart_pressed)
 
 	WindowManager.window_mode_changed.connect(_on_window_mode_changed)
+
+	RunState.crt_toggled.connect(func(enabled: bool) -> void:
+		crt_overlay.visible = enabled
+	)
+	crt_overlay.visible = RunState.is_crt_enabled
 
 	_show_screen(character_select)
 
@@ -99,4 +105,9 @@ func _show_game_end(is_victory: bool) -> void:
 
 func _on_restart_pressed() -> void:
 	AudioSynth.play_click()
+	combat_arena.reset_combat_visuals()
+	map_screen.reset_view()
+	character_select.reset_view()
+	reward_screen.replace_modal.visible = false
+	shop_screen.purge_modal.visible = false
 	_show_screen(character_select)

@@ -7,6 +7,10 @@
 [ext_resource type="PackedScene" path="res://scenes/rewards/reward_screen.tscn" id="4_r6s7t"]
 [ext_resource type="PackedScene" path="res://scenes/shop/shop_screen.tscn" id="5_s8t9u"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pip_overlay.tscn" id="6_p7q8r"]
+[ext_resource type="Shader" path="res://shaders/crt_retro.gdshader" id="7_c8d9e"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_crt"]
+shader = ExtResource("7_c8d9e")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_end"]
 bg_color = Color(0.04, 0.05, 0.09, 0.98)
@@ -153,3 +157,16 @@ text = "INITIALIZE NEW RUN"
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
+
+[node name="CRTLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="CRTOverlay" type="ColorRect" parent="CRTLayer"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_crt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

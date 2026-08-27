@@ -22,3 +22,6 @@ func _ready() -> void:
 func _choose_class(cls: RunState.SpecialistClass) -> void:
 	AudioSynth.play_jackpot()
 	specialist_chosen.emit(cls)
+
+func reset_view() -> void:
+	visible = true

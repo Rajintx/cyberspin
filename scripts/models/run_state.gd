@@ -7,6 +7,7 @@ signal spin_cost_changed(cost: int, turn_num: int)
 signal speed_changed(speed_mult: float)
 signal deck_updated(deck: Array[SymbolData])
 signal relics_updated(relics: Array[RelicData])
+signal crt_toggled(enabled: bool)
 
 # Singleton reference
 static var instance: Node
@@ -34,8 +35,9 @@ var current_node_type: String = "COMBAT"
 # Battle Turn & Escalating Ante (Bandwidth Leak)
 var battle_turn_number: int = 1
 
-# Game Speed Multiplier (1.0x, 1.5x, 2.5x)
+# Game Speed Multiplier (0.6x, 1.0x, 1.5x, 2.5x)
 var game_speed: float = 1.0
+var is_crt_enabled: bool = true
 
 # Lifetime Run Statistics
 var total_spins: int = 0
@@ -679,13 +681,19 @@ func get_current_mult() -> float:
 	return 1.0
 
 func cycle_game_speed() -> void:
-	if game_speed == 1.0:
+	if is_equal_approx(game_speed, 0.6):
+		game_speed = 1.0
+	elif is_equal_approx(game_speed, 1.0):
 		game_speed = 1.5
-	elif game_speed == 1.5:
+	elif is_equal_approx(game_speed, 1.5):
 		game_speed = 2.5
 	else:
-		game_speed = 1.0
+		game_speed = 0.6
 	speed_changed.emit(game_speed)
+
+func toggle_crt() -> void:
+	is_crt_enabled = not is_crt_enabled
+	crt_toggled.emit(is_crt_enabled)
 
 func add_symbol(s: SymbolData) -> void:
 	symbol_deck.append(s)

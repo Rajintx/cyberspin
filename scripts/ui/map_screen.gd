@@ -62,6 +62,10 @@ func _ready() -> void:
 		WindowManager.toggle_pip_mode()
 	)
 
+func reset_view() -> void:
+	if map_scroll:
+		map_scroll.scroll_horizontal = 0
+
 func refresh_map() -> void:
 	var current_floor: int = RunState.current_floor
 	title_label.text = "CYBER NETWORK MAP // FLOOR %d OF 10" % current_floor

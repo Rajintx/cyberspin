@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bv8k2g2v6f1m3"]
 
 [ext_resource type="Script" path="res://scripts/ui/slot_tile.gd" id="1_a1b2c"]
+[ext_resource type="Shader" path="res://shaders/tile_glisten.gdshader" id="2_g1h2i"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tile"]
 bg_color = Color(0.06, 0.07, 0.12, 0.95)
@@ -15,6 +16,15 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 shadow_color = Color(0.0, 0.8, 1.0, 0.25)
 shadow_size = 6
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_glisten"]
+shader = ExtResource("2_g1h2i")
+shader_parameter/shine_color = Color(0.3, 0.8, 1, 0.2)
+shader_parameter/shine_speed = 0.6
+shader_parameter/shine_width = 0.22
+shader_parameter/shine_angle = 45.0
+shader_parameter/shine_frequency = 4.0
+shader_parameter/border_pulse_speed = 1.5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
 bg_color = Color(0.12, 0.14, 0.22, 0.8)
@@ -54,6 +64,13 @@ modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0, 0.941176, 1, 0.4)
+
+[node name="ShimmerOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_glisten")
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.05)
 
 [node name="HazardOverlay" type="ColorRect" parent="."]
 unique_name_in_owner = true
