@@ -153,7 +153,7 @@ func _on_spin_requested() -> void:
 		_log("[color=#cc33ff]☣️ Data Virus triggered! Dealt %d Bleed DMG to Core.[/color]" % virus_dmg)
 
 func _on_spin_completed(eval_result: Dictionary) -> void:
-	if not is_instance_valid(boss_core) or boss_core.current_hp <= 0 or RunState.credits <= 0:
+	if not is_instance_valid(boss_core) or boss_core.current_hp <= 0:
 		return
 
 	is_resolving_turn = true
@@ -347,7 +347,9 @@ func _check_player_bankrupt() -> bool:
 	if RunState.credits <= 0 or RunState.credits < ante_cost:
 		_log("[color=#ff0000]☠️ BANKRUPTCY: TERMINAL BANKROLL (%d 💳) INSUFFICIENT FOR SPIN ANTE (%d 💳).[/color]" % [RunState.credits, ante_cost])
 		CrashLog.log_info("CombatManager", "GAME OVER: Bankroll %d < Ante %d on Floor %d Turn %d" % [RunState.credits, ante_cost, RunState.current_floor, RunState.battle_turn_number])
-		orbital_slot_machine.set_controls_enabled(false)
+		if is_instance_valid(orbital_slot_machine):
+			orbital_slot_machine.set_controls_enabled(false)
+			orbital_slot_machine.reset_machine_visuals()
 		combat_lost.emit()
 		return true
 	return false
@@ -400,7 +402,9 @@ func _on_boss_died(enemy: EnemyData) -> void:
 	CrashLog.log_info("CombatManager", "Victory: %s killed on Floor:%d Turn:%d Reward:%d Bankroll:%d" % [enemy.display_name, RunState.current_floor, RunState.battle_turn_number, earned_credits, RunState.credits])
 	RunState.add_credits(earned_credits)
 	AudioSynth.play_jackpot()
-	orbital_slot_machine.set_controls_enabled(false)
+	if is_instance_valid(orbital_slot_machine):
+		orbital_slot_machine.set_controls_enabled(false)
+		orbital_slot_machine.reset_machine_visuals()
 
 	var spd := RunState.game_speed
 	var win_timer := get_tree().create_timer(1.2 / spd)
@@ -438,6 +442,7 @@ func reset_combat_visuals() -> void:
 	pending_self_bleeds.clear()
 	if is_instance_valid(orbital_slot_machine):
 		orbital_slot_machine.is_laser_on_cooldown = false
+		orbital_slot_machine.reset_machine_visuals()
 	for node in get_tree().get_nodes_in_group("floating_text"):
 		node.queue_free()
 	player_shield_bar.visible = false

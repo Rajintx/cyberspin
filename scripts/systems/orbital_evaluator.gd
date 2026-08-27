@@ -178,7 +178,14 @@ static func evaluate_spin(
 	_check_edge_triad([4, 5, 6], "Bottom Orbital Line", active_symbols, result, bet_mult)
 	_check_edge_triad([6, 7, 0], "Left Orbital Line", active_symbols, result, bet_mult)
 
-	# 6. Apply Vulnerability / Glitch Status Bonus (+50% Crit Damage)
+	# 6. Multi-Combo Chain Bonus (50% bonus damage if 2+ payline combos trigger)
+	var combo_count: int = result.lines_triggered.size()
+	if combo_count >= 2 and result.total_damage > 0:
+		var combo_bonus_dmg: int = int(round(result.total_damage * 0.5))
+		result.total_damage += combo_bonus_dmg
+		result.synergy_notes.append("⚡ MULTI-COMBO CHAIN x%d! +%d (+50%%) Overdrive Damage!" % [combo_count, combo_bonus_dmg])
+
+	# 7. Apply Vulnerability / Glitch Status Bonus (+50% Crit Damage)
 	if is_boss_vulnerable and result.total_damage > 0:
 		var bonus_dmg: int = int(round(result.total_damage * 0.5))
 		result.total_damage += bonus_dmg
