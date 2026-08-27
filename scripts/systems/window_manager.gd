@@ -38,12 +38,14 @@ func set_pip_mode(enable: bool) -> void:
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP, true)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
 		DisplayServer.window_set_size(PIP_WINDOW_SIZE)
+		get_tree().root.content_scale_size = PIP_WINDOW_SIZE
 		get_tree().root.transparent_bg = true
 		snap_to_corner(current_corner)
 	else:
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP, false)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
 		DisplayServer.window_set_size(NORMAL_WINDOW_SIZE)
+		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
 		get_tree().root.transparent_bg = false
 		DisplayServer.window_set_position(last_normal_pos)
 

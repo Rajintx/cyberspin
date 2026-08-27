@@ -117,6 +117,29 @@ func set_controls_enabled(enabled: bool) -> void:
 	overdrive_btn.disabled = not enabled
 	bet_toggle_btn.disabled = not enabled
 
+func set_pip_mode(is_pip: bool) -> void:
+	spin_button.add_theme_font_size_override("font_size", 16 if is_pip else 14)
+	spin_button.custom_minimum_size.y = 46 if is_pip else 40
+
+	var act_font: int = 11 if is_pip else 9
+	var act_h: int = 34 if is_pip else 28
+	purge_btn.add_theme_font_size_override("font_size", act_font)
+	purge_btn.custom_minimum_size.y = act_h
+	reroll_btn.add_theme_font_size_override("font_size", act_font)
+	reroll_btn.custom_minimum_size.y = act_h
+	overdrive_btn.add_theme_font_size_override("font_size", act_font)
+	overdrive_btn.custom_minimum_size.y = act_h
+	bet_toggle_btn.add_theme_font_size_override("font_size", act_font)
+	bet_toggle_btn.custom_minimum_size.y = act_h
+	speed_toggle_btn.add_theme_font_size_override("font_size", act_font)
+	speed_toggle_btn.custom_minimum_size.y = act_h
+
+	for tile in slot_tiles:
+		if is_instance_valid(tile):
+			tile.set_pip_mode(is_pip)
+	if is_instance_valid(boss_core):
+		boss_core.set_pip_mode(is_pip)
+
 func _on_tile_lock_toggled(slot_index: int, is_locked: bool) -> void:
 	if is_spinning or not can_spin:
 		return

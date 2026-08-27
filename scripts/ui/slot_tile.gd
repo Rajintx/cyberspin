@@ -56,6 +56,14 @@ func set_locked(locked: bool) -> void:
 	lock_button.text = "🔒" if locked else "🔓"
 	_update_border_color(Color(1.0, 0.85, 0.2) if locked else (current_symbol.icon_color if current_symbol else Color.WHITE))
 
+func set_pip_mode(is_pip: bool) -> void:
+	icon_label.add_theme_font_size_override("font_size", 36 if is_pip else 32)
+	name_label.add_theme_font_size_override("font_size", 12 if is_pip else 10)
+	value_label.add_theme_font_size_override("font_size", 14 if is_pip else 12)
+	mult_label.add_theme_font_size_override("font_size", 13 if is_pip else 11)
+	lock_button.add_theme_font_size_override("font_size", 13 if is_pip else 11)
+	lock_button.custom_minimum_size = Vector2(28, 26) if is_pip else Vector2(24, 22)
+
 func set_symbol(sym: SymbolData, calculated_mult: float = 1.0) -> void:
 	current_symbol = sym
 	if sym == null:

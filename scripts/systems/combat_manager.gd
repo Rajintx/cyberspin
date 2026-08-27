@@ -21,6 +21,8 @@ var boss_core: BossCore
 @onready var side_panel: Control = %SidePanel
 @onready var v_separator_2: Control = %VSeparator2
 @onready var relic_label: Label = %RelicLabel
+@onready var pip_summary_panel: Control = %PipSummaryPanel
+@onready var pip_summary_label: RichTextLabel = %PipSummaryLabel
 
 var current_enemy: EnemyData
 var is_resolving_turn: bool = false
@@ -53,10 +55,24 @@ func _ready() -> void:
 
 func _on_window_mode_changed(is_pip: bool) -> void:
 	side_panel.visible = not is_pip
+	pip_summary_panel.visible = is_pip
 	v_separator_2.visible = not is_pip
 	relic_label.visible = not is_pip
 	relic_container.visible = not is_pip
 	pip_button.visible = not is_pip
+
+	floor_label.add_theme_font_size_override("font_size", 16 if is_pip else 14)
+	ram_label.add_theme_font_size_override("font_size", 15 if is_pip else 13)
+	credits_label.add_theme_font_size_override("font_size", 15 if is_pip else 13)
+	player_hp_bar.custom_minimum_size.y = 18 if is_pip else 14
+	player_hp_label.add_theme_font_size_override("font_size", 12 if is_pip else 10)
+	player_shield_bar.custom_minimum_size.y = 14 if is_pip else 10
+	player_shield_label.add_theme_font_size_override("font_size", 10 if is_pip else 8)
+
+	if is_instance_valid(orbital_slot_machine):
+		orbital_slot_machine.pivot_offset = Vector2(290, 260)
+		orbital_slot_machine.scale = Vector2(1.15, 1.15) if is_pip else Vector2(1.0, 1.0)
+		orbital_slot_machine.set_pip_mode(is_pip)
 
 func start_combat(enemy: EnemyData) -> void:
 	current_enemy = enemy
@@ -417,6 +433,8 @@ func trigger_screen_shake(intensity: float = 4.0) -> void:
 
 func reset_combat_visuals() -> void:
 	log_label.text = ""
+	if is_instance_valid(pip_summary_label):
+		pip_summary_label.text = "[color=#00f0ff]COMBAT READY // PULL LEVER TO ENGAGE[/color]\n"
 	pending_self_bleeds.clear()
 	if is_instance_valid(orbital_slot_machine):
 		orbital_slot_machine.is_laser_on_cooldown = false
@@ -427,3 +445,5 @@ func reset_combat_visuals() -> void:
 
 func _log(bbcode: String) -> void:
 	log_label.append_text(bbcode + "\n")
+	if is_instance_valid(pip_summary_label):
+		pip_summary_label.append_text(bbcode + "\n")

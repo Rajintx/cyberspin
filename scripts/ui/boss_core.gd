@@ -42,6 +42,20 @@ func _ready() -> void:
 	hit_flash.modulate.a = 0.0
 	_start_breathing_animation()
 
+func set_pip_mode(is_pip: bool) -> void:
+	avatar_label.add_theme_font_size_override("font_size", 40 if is_pip else 36)
+	name_label.add_theme_font_size_override("font_size", 12 if is_pip else 10)
+	intent_icon.add_theme_font_size_override("font_size", 13 if is_pip else 11)
+	intent_desc.add_theme_font_size_override("font_size", 12 if is_pip else 10)
+	hp_bar.custom_minimum_size.y = 14 if is_pip else 10
+	hp_label.add_theme_font_size_override("font_size", 10 if is_pip else 8)
+	shield_bar.custom_minimum_size.y = 12 if is_pip else 8
+	shield_label.add_theme_font_size_override("font_size", 9 if is_pip else 7)
+	burn_tag.add_theme_font_size_override("font_size", 11 if is_pip else 9)
+	virus_tag.add_theme_font_size_override("font_size", 11 if is_pip else 9)
+	emp_tag.add_theme_font_size_override("font_size", 11 if is_pip else 9)
+	glitch_tag.add_theme_font_size_override("font_size", 11 if is_pip else 9)
+
 func init_enemy(data: EnemyData) -> void:
 	enemy_data = data
 	enemy_data.current_stage_index = 0
