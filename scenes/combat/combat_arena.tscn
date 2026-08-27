@@ -1,0 +1,248 @@
+[gd_scene format=3 uid="uid://dm6k2q8x1b9v4"]
+
+[ext_resource type="Script" path="res://scripts/systems/combat_manager.gd" id="1_a2b3c"]
+[ext_resource type="PackedScene" path="res://scenes/combat/orbital_slot_machine.tscn" id="2_c3d4e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud"]
+bg_color = Color(0.05, 0.06, 0.1, 0.95)
+border_width_bottom = 2
+border_color = Color(0.0, 0.85, 1, 0.5)
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0.4, 0.8, 0.2)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_php_bg"]
+bg_color = Color(0.08, 0.08, 0.14, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_php_fill"]
+bg_color = Color(0.0, 0.9, 0.5, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pshd_fill"]
+bg_color = Color(0.0, 0.7, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pip_btn"]
+bg_color = Color(0.12, 0.16, 0.28, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.0, 0.8, 1, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_log"]
+bg_color = Color(0.04, 0.04, 0.08, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.3, 0.5, 0.5)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="CombatArena" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_a2b3c")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.05, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TopHUD" type="PanelContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud")
+
+[node name="Margin" type="MarginContainer" parent="VBox/TopHUD"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="VBox/TopHUD/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="FloorLabel" type="Label" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "FLOOR 1 // SECTOR ENCOUNTER"
+
+[node name="VSeparator1" type="VSeparator" parent="VBox/TopHUD/Margin/HBox"]
+layout_mode = 2
+
+[node name="HpContainer" type="VBoxContainer" parent="VBox/TopHUD/Margin/HBox"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="PlayerHpBar" type="ProgressBar" parent="VBox/TopHUD/Margin/HBox/HpContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_php_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_php_fill")
+value = 100.0
+show_percentage = false
+
+[node name="PlayerHpLabel" type="Label" parent="VBox/TopHUD/Margin/HBox/HpContainer/PlayerHpBar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.05, 0.1, 0.05, 1)
+theme_override_font_sizes/font_size = 10
+text = "80 / 80 HP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerShieldBar" type="ProgressBar" parent="VBox/TopHUD/Margin/HBox/HpContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_php_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_pshd_fill")
+value = 20.0
+show_percentage = false
+
+[node name="PlayerShieldLabel" type="Label" parent="VBox/TopHUD/Margin/HBox/HpContainer/PlayerShieldBar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.05, 0.1, 0.2, 1)
+theme_override_font_sizes/font_size = 8
+text = "10 SHIELD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RamLabel" type="Label" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "💾 RAM: 5 / 5"
+
+[node name="CreditsLabel" type="Label" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "💳 60 CREDITS"
+
+[node name="VSeparator2" type="VSeparator" parent="VBox/TopHUD/Margin/HBox"]
+layout_mode = 2
+
+[node name="RelicLabel" type="Label" parent="VBox/TopHUD/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "HARDWARE:"
+
+[node name="RelicContainer" type="HBoxContainer" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PipButton" type="Button" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.0, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_pip_btn")
+text = "📺 PiP MODE"
+
+[node name="MainContent" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="SlotCenter" type="CenterContainer" parent="VBox/MainContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OrbitalSlotMachine" parent="VBox/MainContent/SlotCenter" instance=ExtResource("2_c3d4e")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SidePanel" type="VBoxContainer" parent="VBox/MainContent"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LogTitle" type="Label" parent="VBox/MainContent/SidePanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "TERMINAL COMBAT FEED"
+
+[node name="LogPanel" type="PanelContainer" parent="VBox/MainContent/SidePanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_log")
+
+[node name="Margin" type="MarginContainer" parent="VBox/MainContent/SidePanel/LogPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CombatLog" type="RichTextLabel" parent="VBox/MainContent/SidePanel/LogPanel/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+theme_override_font_sizes/normal_font_size = 11
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true

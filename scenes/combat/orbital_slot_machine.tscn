@@ -1,0 +1,291 @@
+[gd_scene format=3 uid="uid://cx8w9q3v4m1b8"]
+
+[ext_resource type="Script" path="res://scripts/ui/orbital_slot_machine.gd" id="1_k2l3m"]
+[ext_resource type="PackedScene" path="res://scenes/ui/slot_tile.tscn" id="2_s1t2u"]
+[ext_resource type="PackedScene" path="res://scenes/combat/boss_core.tscn" id="3_b4c5d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chassis"]
+bg_color = Color(0.04, 0.05, 0.09, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.0, 0.8, 1, 0.7)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0.5, 1, 0.3)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_spin_btn"]
+bg_color = Color(0.0, 0.75, 0.95, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0.8, 1, 0.5)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_btn"]
+bg_color = Color(0.1, 0.12, 0.22, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.5, 0.8, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lever_bar"]
+bg_color = Color(0.3, 0.35, 0.45, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knob"]
+bg_color = Color(1, 0.15, 0.35, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.8, 0.9, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(1, 0.1, 0.4, 0.6)
+shadow_size = 8
+
+[node name="OrbitalSlotMachine" type="Control"]
+custom_minimum_size = Vector2(580, 520)
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -290.0
+offset_top = -260.0
+offset_right = 290.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_k2l3m")
+
+[node name="Chassis" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_chassis")
+
+[node name="Margin" type="MarginContainer" parent="Chassis"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="MainLayout" type="HBoxContainer" parent="Chassis/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="SlotArea" type="VBoxContainer" parent="Chassis/Margin/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="InfoBanner" type="Label" parent="Chassis/Margin/MainLayout/SlotArea"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "NOT ENOUGH RAM TO LOCK REEL!"
+horizontal_alignment = 1
+
+[node name="GridCenter" type="CenterContainer" parent="Chassis/Margin/MainLayout/SlotArea"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 3
+
+[node name="Tile0" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile1" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile2" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile7" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BossCore" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("3_b4c5d")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile3" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile6" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile5" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tile4" parent="Chassis/Margin/MainLayout/SlotArea/GridCenter/GridContainer" instance=ExtResource("2_s1t2u")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ActionsBar" type="HBoxContainer" parent="Chassis/Margin/MainLayout/SlotArea"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RerollBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "🎲 REROLL (2💾)"
+tooltip_text = "Spend 2 RAM to respin all unlocked reels without taking enemy damage. [R]"
+
+[node name="OverdriveBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "⚡ OVERDRIVE (3💾)"
+tooltip_text = "Spend 3 RAM to lock matching laser chips for guaranteed Cross-Core Piercer! [O]"
+
+[node name="BetToggleBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "💰 BET: 5💳 (x1.0)"
+tooltip_text = "Cycle bet ante & multiplier: Standard (5) / Overdrive (10) / Hyper (20). [B]"
+
+[node name="SpeedToggleBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 28)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "⏩ 1.0X"
+tooltip_text = "Combat animation speed toggle (1x / 1.5x / 2.5x). [Tab]"
+
+[node name="SpinButton" type="Button" parent="Chassis/Margin/MainLayout/SlotArea"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.04, 0.06, 0.1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_spin_btn")
+text = "⚡ PULL LEVER / SPIN [SPACE] ⚡"
+
+[node name="LeverArea" type="Control" parent="Chassis/Margin/MainLayout"]
+custom_minimum_size = Vector2(50, 400)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="LeverBase" type="Panel" parent="Chassis/Margin/MainLayout/LeverArea"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -18.0
+offset_top = -60.0
+offset_right = 18.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_lever_bar")
+
+[node name="LeverHandle" type="Control" parent="Chassis/Margin/MainLayout/LeverArea"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -6.0
+offset_top = 20.0
+offset_right = 6.0
+offset_bottom = 280.0
+grow_horizontal = 2
+
+[node name="LeverRod" type="Panel" parent="Chassis/Margin/MainLayout/LeverArea/LeverHandle"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -3.0
+offset_top = 16.0
+offset_right = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_lever_bar")
+
+[node name="LeverKnob" type="Button" parent="Chassis/Margin/MainLayout/LeverArea/LeverHandle"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -16.0
+offset_top = -8.0
+offset_right = 16.0
+offset_bottom = 24.0
+grow_horizontal = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_knob")
+
+[node name="PaylineCanvas" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

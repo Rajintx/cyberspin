@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://b6q1v8m3x4k9w"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_a2b3c"]
+[ext_resource type="PackedScene" path="res://scenes/map/map_screen.tscn" id="2_m1s2t"]
+[ext_resource type="PackedScene" path="res://scenes/combat/combat_arena.tscn" id="3_c4a5b"]
+[ext_resource type="PackedScene" path="res://scenes/rewards/reward_screen.tscn" id="4_r6s7t"]
+[ext_resource type="PackedScene" path="res://scenes/shop/shop_screen.tscn" id="5_s8t9u"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pip_overlay.tscn" id="6_p7q8r"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_end"]
+bg_color = Color(0.04, 0.05, 0.09, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.0, 0.9, 1, 0.7)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0.6, 1, 0.4)
+shadow_size = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_restart"]
+bg_color = Color(0.0, 0.75, 1, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0.8, 1, 0.5)
+shadow_size = 8
+
+[node name="MainGame" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_a2b3c")
+
+[node name="MapScreen" parent="." instance=ExtResource("2_m1s2t")]
+unique_name_in_owner = true
+layout_mode = 1
+
+[node name="CombatArena" parent="." instance=ExtResource("3_c4a5b")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="RewardScreen" parent="." instance=ExtResource("4_r6s7t")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="ShopScreen" parent="." instance=ExtResource("5_s8t9u")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="EndScreen" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Backdrop" type="ColorRect" parent="EndScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.04, 0.95)
+
+[node name="Center" type="CenterContainer" parent="EndScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="EndScreen/Center"]
+custom_minimum_size = Vector2(480, 280)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_end")
+
+[node name="Margin" type="MarginContainer" parent="EndScreen/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="EndScreen/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="EndTitle" type="Label" parent="EndScreen/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "RUN COMPLETED"
+horizontal_alignment = 1
+
+[node name="EndDesc" type="Label" parent="EndScreen/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "Summary of your cyber run results."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="StatsSummary" type="Label" parent="EndScreen/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 11
+text = "Total Spins: 0 | Jackpots: 0 | Peak DMG: 0"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="EndScreen/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(0.04, 0.06, 0.1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_restart")
+text = "INITIALIZE NEW RUN"
+
+[node name="PiPOverlay" parent="." instance=ExtResource("6_p7q8r")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1

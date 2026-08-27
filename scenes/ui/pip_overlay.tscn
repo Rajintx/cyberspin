@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://cx4m8q2v7b1n9"]
+
+[ext_resource type="Script" path="res://scripts/ui/pip_overlay.gd" id="1_p2q3r"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
+bg_color = Color(0.06, 0.08, 0.15, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9, 1, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0.5, 1, 0.4)
+shadow_size = 8
+
+[node name="PiPOverlay" type="Control"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 36.0
+grow_horizontal = 2
+script = ExtResource("1_p2q3r")
+
+[node name="DragHeader" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 13
+theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+
+[node name="Margin" type="MarginContainer" parent="DragHeader"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 2
+
+[node name="HBox" type="HBoxContainer" parent="DragHeader/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="DragHeader/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "📺 CYBER-SPIN PiP (DRAG HERE)"
+
+[node name="AutoSpinBtn" type="Button" parent="DragHeader/Margin/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 24)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 10
+toggle_mode = true
+text = "🤖 AUTO: OFF"
+
+[node name="SnapMenuBtn" type="MenuButton" parent="DragHeader/Margin/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 10
+text = "📌 Dock ▾"
+flat = false
+
+[node name="OpacityLabel" type="Label" parent="DragHeader/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "🔆"
+
+[node name="OpacitySlider" type="HSlider" parent="DragHeader/Margin/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+min_value = 25.0
+value = 95.0
+
+[node name="ExpandBtn" type="Button" parent="DragHeader/Margin/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 11
+text = "⛶"
+tooltip_text = "Expand to Full Dashboard (1280x720)"
