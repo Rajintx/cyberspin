@@ -108,6 +108,8 @@ func populate_initial_grid(deck: Array[SymbolData]) -> void:
 
 func set_controls_enabled(enabled: bool) -> void:
 	can_spin = enabled
+	if enabled:
+		is_spinning = false
 	spin_button.disabled = not enabled
 	lever_knob.disabled = not enabled
 	purge_btn.disabled = not enabled
@@ -160,6 +162,8 @@ func _on_reroll_pressed() -> void:
 	if RunState.spend_ram(2):
 		AudioSynth.play_laser()
 		show_banner("🎲 HACK REROLL: Unlocked reels respun!")
+		set_controls_enabled(false)
+		is_spinning = true
 		_execute_spin_visuals(false)
 	else:
 		show_banner("⚠️ NOT ENOUGH RAM FOR HACK REROLL! (Cost: 2 RAM)")
@@ -167,7 +171,7 @@ func _on_reroll_pressed() -> void:
 func _on_overdrive_pressed() -> void:
 	if is_spinning or not can_spin:
 		return
-	if RunState.spend_ram(3):
+	if RunState.spend_ram(2):
 		AudioSynth.play_jackpot()
 		show_banner("⚡ OVERDRIVE: Laser Cross-Beam Guaranteed!")
 		var heavy_laser := RunState.get_symbol_by_id("laser")
@@ -181,7 +185,7 @@ func _on_overdrive_pressed() -> void:
 			slot_tiles[1].set_locked(true)
 			slot_tiles[5].set_locked(true)
 	else:
-		show_banner("⚠️ NOT ENOUGH RAM FOR OVERDRIVE! (Cost: 3 RAM)")
+		show_banner("⚠️ NOT ENOUGH RAM FOR OVERDRIVE! (Cost: 2 RAM)")
 
 func _on_bet_toggle_pressed() -> void:
 	AudioSynth.play_click()

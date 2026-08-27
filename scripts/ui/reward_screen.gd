@@ -138,8 +138,9 @@ func _open_replace_modal() -> void:
 
 		var rep_btn := Button.new()
 		rep_btn.text = "REPLACE"
+		var rep_idx := i
 		rep_btn.pressed.connect(func():
-			RunState.replace_symbol_at(i, _pending_chosen_symbol)
+			RunState.replace_symbol_at(rep_idx, _pending_chosen_symbol)
 			AudioSynth.play_jackpot()
 			replace_modal.visible = false
 			reward_completed.emit()
