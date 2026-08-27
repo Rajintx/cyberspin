@@ -254,9 +254,10 @@ func _on_open_purge_pressed() -> void:
 
 		var del_btn := Button.new()
 		del_btn.text = "PURGE (💳25)"
+		var sym_idx: int = i
 		del_btn.pressed.connect(func():
 			RunState.modify_credits(-purge_cost)
-			RunState.remove_symbol_at(i)
+			RunState.remove_symbol_at(sym_idx)
 			AudioSynth.play_laser()
 			purge_modal.visible = false
 			purge_button.disabled = true

@@ -46,6 +46,10 @@ func advance_to_next_stage() -> Dictionary:
 		avatar_glyph = next_st.get("avatar", avatar_glyph)
 		max_hp = next_st.get("hp", max_hp)
 		starting_shield = next_st.get("shield", starting_shield)
-		intent_sequence = next_st.get("intents", intent_sequence)
+		var raw_intents = next_st.get("intents", [])
+		intent_sequence.clear()
+		for item in raw_intents:
+			if item is Dictionary:
+				intent_sequence.append(item as Dictionary)
 		return next_st
 	return {}

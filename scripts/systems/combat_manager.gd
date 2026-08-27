@@ -166,7 +166,7 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 
 	if glitch > 0:
 		boss_core.add_status("GLITCH", glitch)
-		_log("[color=#ff0088]👾 Glitch Injected! Boss is Vulnerable (+50%% DMG).[/color]" % glitch)
+		_log("[color=#ff0088]👾 Glitch Injected (%d Stacks)! Boss is Vulnerable (+50%% DMG).[/color]" % glitch)
 
 	if creds > 0:
 		RunState.add_credits(creds)
@@ -180,7 +180,7 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 	if RunState.credits <= 0:
 		is_resolving_turn = false
 		return
-	if boss_core.current_hp <= 0:
+	if not is_instance_valid(boss_core) or boss_core.current_hp <= 0:
 		is_resolving_turn = false
 		return
 
@@ -194,7 +194,11 @@ func _resolve_tile_hazards() -> void:
 	var total_poison_drain: int = 0
 
 	for i in range(8):
+		if i >= orbital_slot_machine.slot_tiles.size():
+			continue
 		var tile: SlotTile = orbital_slot_machine.slot_tiles[i]
+		if not is_instance_valid(tile):
+			continue
 		if tile.hazard_type == SlotTile.HazardType.SPIKE:
 			total_spike_dmg += 10 + RunState.current_floor
 			tile.play_hazard_trigger_fx()
@@ -212,7 +216,7 @@ func _resolve_tile_hazards() -> void:
 		_apply_damage_to_player(total_poison_drain)
 
 func _execute_boss_turn() -> void:
-	if boss_core.current_hp <= 0:
+	if not is_instance_valid(boss_core) or boss_core.current_hp <= 0:
 		is_resolving_turn = false
 		return
 
