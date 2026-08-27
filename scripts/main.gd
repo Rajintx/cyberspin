@@ -96,15 +96,18 @@ func _show_game_end(is_victory: bool) -> void:
 		end_title.text = "🏆 MEGACORP OMEGA NEXUS PURGED! 🏆"
 		end_title.modulate = Color(0.0, 1.0, 0.5)
 		end_desc.text = "You successfully breached all 10 corporate security layers and brought down the God AI!\nFinal Bankroll: %d Credits" % RunState.credits
+		CrashLog.log_info("MainGame", "RUN VICTORY! Bankroll:%d Spins:%d Jackpots:%d Purged:%d" % [RunState.credits, RunState.total_spins, RunState.total_jackpots, RunState.total_enemies_purged])
 		AudioSynth.play_jackpot()
 	else:
 		end_title.text = "☠️ BANKRUPT / TERMINAL SHUTDOWN ☠️"
 		end_title.modulate = Color(1.0, 0.1, 0.3)
 		end_desc.text = "Your bankroll was drained on Floor %d. The cyber security matrix seized your terminal." % RunState.current_floor
+		CrashLog.log_info("MainGame", "RUN DEFEAT / BANKRUPTCY on Floor:%d Bankroll:%d Spins:%d" % [RunState.current_floor, RunState.credits, RunState.total_spins])
 		AudioSynth.play_tone(200, 50, 0.6, -2.0, "saw")
 
 func _on_restart_pressed() -> void:
 	AudioSynth.play_click()
+	CrashLog.log_info("MainGame", "Restarting run from Character Select")
 	combat_arena.reset_combat_visuals()
 	map_screen.reset_view()
 	character_select.reset_view()

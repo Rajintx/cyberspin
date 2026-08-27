@@ -50,6 +50,12 @@ func _on_lock_button_toggled(button_pressed: bool) -> void:
 	_update_border_color(Color(1.0, 0.85, 0.2) if is_locked else (current_symbol.icon_color if current_symbol else Color.WHITE))
 	lock_toggled.emit(slot_index, is_locked)
 
+func set_locked(locked: bool) -> void:
+	is_locked = locked
+	lock_button.set_pressed_no_signal(locked)
+	lock_button.text = "🔒" if locked else "🔓"
+	_update_border_color(Color(1.0, 0.85, 0.2) if locked else (current_symbol.icon_color if current_symbol else Color.WHITE))
+
 func set_symbol(sym: SymbolData, calculated_mult: float = 1.0) -> void:
 	current_symbol = sym
 	if sym == null:

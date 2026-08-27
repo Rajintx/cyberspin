@@ -88,9 +88,9 @@ value = 95.0
 
 [node name="ExpandBtn" type="Button" parent="DragHeader/Margin/HBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 22)
+custom_minimum_size = Vector2(80, 32)
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 11
-text = "⛶"
+theme_override_font_sizes/font_size = 16
+text = "⛶ EXIT"
 tooltip_text = "Expand to Full Dashboard (1280x720)"

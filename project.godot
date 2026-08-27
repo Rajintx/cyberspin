@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 RunState="*res://scripts/models/run_state.gd"
 AudioSynth="*res://scripts/systems/audio_synth.gd"
 WindowManager="*res://scripts/systems/window_manager.gd"
+CrashLog="*res://scripts/systems/crash_log.gd"
 
 [display]
 

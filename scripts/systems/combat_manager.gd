@@ -67,6 +67,7 @@ func start_combat(enemy: EnemyData) -> void:
 	floor_label.text = "FLOOR %d/10 // %s" % [RunState.current_floor, enemy.display_name.to_upper()]
 	_log("[color=#00f0ff]=== ENGAGING ENEMY: %s ===[/color]" % enemy.display_name)
 	_log("[color=#8888aa]\"%s\"[/color]" % enemy.flavor_quote)
+	CrashLog.log_info("CombatManager", "Combat Start: %s (HP:%d Shield:%d) Floor:%d Bankroll:%d" % [enemy.display_name, enemy.max_hp, enemy.starting_shield, RunState.current_floor, RunState.credits])
 	_update_all_hud()
 
 	if _check_player_bankrupt():
@@ -317,6 +318,7 @@ func _check_player_bankrupt() -> bool:
 	var ante_cost := RunState.get_current_spin_cost()
 	if RunState.credits <= 0 or RunState.credits < ante_cost:
 		_log("[color=#ff0000]☠️ BANKRUPTCY: TERMINAL BANKROLL (%d 💳) INSUFFICIENT FOR SPIN ANTE (%d 💳).[/color]" % [RunState.credits, ante_cost])
+		CrashLog.log_info("CombatManager", "GAME OVER: Bankroll %d < Ante %d on Floor %d Turn %d" % [RunState.credits, ante_cost, RunState.current_floor, RunState.battle_turn_number])
 		orbital_slot_machine.set_controls_enabled(false)
 		combat_lost.emit()
 		return true
@@ -367,6 +369,7 @@ func _on_boss_died(enemy: EnemyData) -> void:
 	if RunState.has_relic(RelicData.RelicType.GOLDEN_CIRCUIT):
 		earned_credits = int(round(earned_credits * 1.5))
 
+	CrashLog.log_info("CombatManager", "Victory: %s killed on Floor:%d Turn:%d Reward:%d Bankroll:%d" % [enemy.display_name, RunState.current_floor, RunState.battle_turn_number, earned_credits, RunState.credits])
 	RunState.add_credits(earned_credits)
 	AudioSynth.play_jackpot()
 	orbital_slot_machine.set_controls_enabled(false)
