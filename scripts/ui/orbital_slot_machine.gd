@@ -32,6 +32,7 @@ var corrupted_indices: Array[bool] = [false, false, false, false, false, false, 
 
 var is_spinning: bool = false
 var can_spin: bool = true
+var is_laser_on_cooldown: bool = false
 var _lever_initial_pos: Vector2
 
 # Payline drawing overlays
@@ -313,7 +314,13 @@ func _on_reels_settled(symbols: Array[SymbolData], trigger_combat: bool) -> void
 	var is_vuln: bool = (boss_core.glitch_stacks > 0)
 	var active_relics: Array[RelicData] = RunState.relics
 	var bet_mult: float = RunState.get_current_mult()
-	var eval_result := OrbitalEvaluator.evaluate_spin(symbols, is_vuln, active_relics, bet_mult, RunState.credits)
+	var eval_result := OrbitalEvaluator.evaluate_spin(symbols, is_vuln, active_relics, bet_mult, RunState.credits, is_laser_on_cooldown)
+
+	# Update laser cooldown cycle for next turn
+	if is_laser_on_cooldown:
+		is_laser_on_cooldown = false
+	elif eval_result.get("laser_fired", false):
+		is_laser_on_cooldown = true
 
 	# Apply slot multiplier labels
 	for i in range(8):

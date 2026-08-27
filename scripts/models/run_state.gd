@@ -63,17 +63,17 @@ func _build_master_libraries() -> void:
 	all_relic_library.clear()
 	all_enemy_library.clear()
 
-	# 1. Plasma Laser (Attack)
+	# 1. Plasma Laser (Attack - Cooldown)
 	var laser := SymbolData.new()
 	laser.id = "laser"
 	laser.display_name = "Plasma Laser"
 	laser.symbol_type = SymbolData.SymbolType.ATTACK
-	laser.base_chips = 4
-	laser.mult_add = 0.3
+	laser.base_chips = 8
+	laser.mult_add = 0.5
 	laser.icon_glyph = "⚡"
 	laser.icon_color = Color(0.0, 0.95, 1.0)
 	laser.glow_color = Color(0.0, 0.7, 1.0, 0.4)
-	laser.description = "Deals 4 Base Chips (+0.3 Mult) Cyber Damage."
+	laser.description = "High-energy cyber laser (8 Chips, +0.5 Mult). Enters 1-Round Cooldown after firing."
 	all_symbol_library.append(laser)
 
 	# 2. Hyper Railgun (High Attack)
@@ -90,30 +90,30 @@ func _build_master_libraries() -> void:
 	railgun.description = "Heavy artillery dealing 9 Base Chips (+0.6 Mult) Piercing Damage."
 	all_symbol_library.append(railgun)
 
-	# 3. Arc Monoblade (High Mult Attack)
+	# 3. Arc Monoblade (High Mult Attack - Dual Bleed)
 	var blade := SymbolData.new()
 	blade.id = "arc_blade"
 	blade.display_name = "Arc Monoblade"
 	blade.symbol_type = SymbolData.SymbolType.ATTACK
-	blade.base_chips = 6
-	blade.mult_add = 1.0
+	blade.base_chips = 5
+	blade.mult_add = 0.8
 	blade.rarity = SymbolData.Rarity.UNCOMMON
 	blade.icon_glyph = "🗡️"
 	blade.icon_color = Color(0.9, 0.2, 0.9)
 	blade.glow_color = Color(0.8, 0.1, 0.8, 0.5)
-	blade.description = "High-critical blade delivering 6 Chips (+1.0 Mult)."
+	blade.description = "Delivers 5 Chips (+0.8 Mult) and applies +2 Bleed to Boss, but triggers 4 Delayed Self-Bleed after 2 rounds."
 	all_symbol_library.append(blade)
 
-	# 4. Nano Firewall (Shield)
+	# 4. Nano Firewall (Shield - 2 Turn Decay)
 	var shield := SymbolData.new()
 	shield.id = "firewall"
 	shield.display_name = "Nano Firewall"
 	shield.symbol_type = SymbolData.SymbolType.SHIELD
-	shield.base_chips = 5
+	shield.base_chips = 6
 	shield.icon_glyph = "🛡️"
 	shield.icon_color = Color(0.1, 0.7, 1.0)
 	shield.glow_color = Color(0.1, 0.5, 0.9, 0.4)
-	shield.description = "Deploys +5 Firewall Shield to protect Bankroll."
+	shield.description = "Deploys +6 Firewall Shield to protect Bankroll. Shield decays every 2 rounds."
 	all_symbol_library.append(shield)
 
 	# 5. Aegis Matrix (Heavy Shield)
@@ -589,7 +589,7 @@ func init_new_run(specialist: SpecialistClass = SpecialistClass.SNIPER) -> void:
 			_add_starter_symbols("laser", 4)
 			_add_starter_symbols("arc_blade", 3)
 			_add_starter_symbols("firewall", 3)
-			_add_starter_symbols("ram_bit", 2)
+			_add_starter_symbols("ram_bit", 1)
 			_add_starter_symbols("battery", 2)
 		SpecialistClass.TANK:
 			credits = 50

@@ -24,10 +24,11 @@ const RING_ORDER: Array[Vector2i] = [
 
 static func evaluate_spin(
 	grid_symbols: Array[SymbolData],
-	is_boss_vulnerable: bool = false,
-	active_relics: Array[RelicData] = [],
+	is_boss_vulnerable: bool,
+	active_relics: Array[RelicData],
 	bet_mult: float = 1.0,
-	bankroll: int = 100
+	bankroll: int = 100,
+	is_laser_on_cooldown: bool = false
 ) -> Dictionary:
 	var result := {
 		"total_damage": 0,
@@ -41,7 +42,9 @@ static func evaluate_spin(
 		"lines_triggered": [],
 		"synergy_notes": [],
 		"slot_multipliers": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-		"is_jackpot_fever": false
+		"is_jackpot_fever": false,
+		"laser_fired": false,
+		"self_bleed_count": 0
 	}
 
 	if grid_symbols.size() < 8:
@@ -117,8 +120,22 @@ static func evaluate_spin(
 
 		match sym.symbol_type:
 			SymbolData.SymbolType.ATTACK:
-				raw_attack_chips += int(round(sym.base_chips * slot_mult))
-				total_attack_mult += sym.mult_add
+				if sym.id == "laser":
+					if is_laser_on_cooldown:
+						result.synergy_notes.append("⚡ Plasma Laser on Cooldown (1 Round)! Inactive.")
+					else:
+						raw_attack_chips += int(round(sym.base_chips * slot_mult))
+						total_attack_mult += sym.mult_add
+						result["laser_fired"] = true
+				elif sym.id == "arc_blade":
+					raw_attack_chips += int(round(sym.base_chips * slot_mult))
+					total_attack_mult += sym.mult_add
+					result.virus_stacks += 2
+					result["self_bleed_count"] += 1
+					result.synergy_notes.append("🗡️ Arc Monoblade: +2 Bleed to Boss! (4 Self-Bleed in 2 turns)")
+				else:
+					raw_attack_chips += int(round(sym.base_chips * slot_mult))
+					total_attack_mult += sym.mult_add
 			SymbolData.SymbolType.SHIELD:
 				var eff_shd: int = int(round(sym.base_chips * slot_mult * bet_mult))
 				result.total_shield += eff_shd

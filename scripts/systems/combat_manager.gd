@@ -21,6 +21,7 @@ var boss_core: BossCore
 
 var current_enemy: EnemyData
 var is_resolving_turn: bool = false
+var pending_self_bleeds: Array[Dictionary] = []
 
 func _ready() -> void:
 	boss_core = orbital_slot_machine.boss_core
@@ -174,6 +175,14 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 		boss_core.add_status("GLITCH", glitch)
 		_log("[color=#ff0088]👾 Glitch Injected (%d Stacks)! Boss is Vulnerable (+50%% DMG).[/color]" % glitch)
 
+	# Queue Monoblade Delayed Self-Bleed (triggers after 2 turns)
+	var self_bleeds: int = eval_result.get("self_bleed_count", 0)
+	if self_bleeds > 0:
+		var trigger_turn: int = RunState.battle_turn_number + 2
+		var total_self_dmg: int = self_bleeds * 4
+		pending_self_bleeds.append({"turn": trigger_turn, "damage": total_self_dmg})
+		_log("[color=#ff0055]🩸 Arc Monoblade Feedback: Queued %d Self-Bleed damage (Triggers Turn %d).[/color]" % [total_self_dmg, trigger_turn])
+
 	if creds > 0:
 		RunState.add_credits(creds)
 		spawn_floating_text("+%d 💳" % creds, Color(1.0, 0.85, 0.2), credits_label.global_position + Vector2(20, 20))
@@ -274,15 +283,26 @@ func _execute_boss_turn() -> void:
 
 	boss_core.advance_intent()
 
-	# C. 50% Active Shield Decay at Turn End
-	if RunState.player_shield > 0:
+	# C. Trigger Delayed Monoblade Self-Bleeds
+	var remaining_bleeds: Array[Dictionary] = []
+	for bleed in pending_self_bleeds:
+		if RunState.battle_turn_number >= bleed.get("turn", 0):
+			var delayed_dmg: int = bleed.get("damage", 0)
+			_log("[color=#ff0055]🩸 Monoblade Delayed Self-Bleed Triggered! -%d Credits from Bankroll.[/color]" % delayed_dmg)
+			_apply_damage_to_player(delayed_dmg)
+		else:
+			remaining_bleeds.append(bleed)
+	pending_self_bleeds = remaining_bleeds
+
+	# D. 50% Active Shield Decay every 2 turns
+	if RunState.battle_turn_number % 2 == 0 and RunState.player_shield > 0:
 		var decayed_shield := int(floor(float(RunState.player_shield) * 0.5))
 		var lost := RunState.player_shield - decayed_shield
 		RunState.set_shield(decayed_shield)
 		if lost > 0:
-			_log("[color=#4477aa]🛡️ Firewall Dissipated: -%d Shield (50%% Turn Decay).[/color]" % lost)
+			_log("[color=#4477aa]🛡️ Firewall Dissipated: -%d Shield (2-Turn Decay Cycle).[/color]" % lost)
 
-	# D. Advance Battle Turn
+	# E. Advance Battle Turn
 	RunState.start_new_battle_turn()
 	is_resolving_turn = false
 
@@ -382,6 +402,9 @@ func trigger_screen_shake(intensity: float = 4.0) -> void:
 
 func reset_combat_visuals() -> void:
 	log_label.text = ""
+	pending_self_bleeds.clear()
+	if is_instance_valid(orbital_slot_machine):
+		orbital_slot_machine.is_laser_on_cooldown = false
 	for node in get_tree().get_nodes_in_group("floating_text"):
 		node.queue_free()
 	player_shield_bar.visible = false
