@@ -76,6 +76,7 @@ func set_pip_mode(enable: bool) -> void:
 		last_normal_pos = DisplayServer.window_get_position()
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP, true)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
+		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_TRANSPARENT, true)
 		DisplayServer.window_set_size(PIP_WINDOW_SIZE)
 		get_tree().root.content_scale_size = PIP_WINDOW_SIZE
 		get_tree().root.transparent_bg = true
@@ -83,6 +84,7 @@ func set_pip_mode(enable: bool) -> void:
 	else:
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP, false)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
+		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_TRANSPARENT, false)
 		DisplayServer.window_set_size(NORMAL_WINDOW_SIZE)
 		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
 		get_tree().root.transparent_bg = false

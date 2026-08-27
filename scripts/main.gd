@@ -28,6 +28,7 @@ func _ready() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 
 	WindowManager.window_mode_changed.connect(_on_window_mode_changed)
+	WindowManager.opacity_changed.connect(_on_opacity_changed)
 
 	RunState.crt_toggled.connect(func(enabled: bool) -> void:
 		crt_overlay.visible = enabled
@@ -40,6 +41,7 @@ func _ready() -> void:
 	)
 	crt_overlay.visible = RunState.is_crt_enabled
 
+	_update_ui_opacity()
 	_show_screen(character_select)
 
 func _on_settings_pressed() -> void:
@@ -51,6 +53,16 @@ func _on_window_mode_changed(is_pip: bool) -> void:
 	settings_button.visible = not is_pip
 	if is_pip and settings_modal.visible:
 		settings_modal.visible = false
+	_update_ui_opacity()
+
+func _on_opacity_changed(_alpha: float) -> void:
+	_update_ui_opacity()
+
+func _update_ui_opacity() -> void:
+	if WindowManager.is_pip_mode:
+		modulate.a = WindowManager.pip_opacity
+	else:
+		modulate.a = 1.0
 
 func _show_screen(active_control: Control) -> void:
 	character_select.visible = (active_control == character_select)

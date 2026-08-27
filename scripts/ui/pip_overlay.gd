@@ -13,7 +13,7 @@ var _auto_spin_timer: float = 0.0
 func _ready() -> void:
 	setup_snap_menu()
 	connect_signals()
-	_on_opacity_changed(WindowManager.pip_opacity)
+	opacity_slider.value = WindowManager.pip_opacity * 100.0
 
 func _process(delta: float) -> void:
 	if not visible:
@@ -65,9 +65,7 @@ func _on_pip_mode_changed(_is_pip: bool) -> void:
 		content_root.scale = Vector2(1.0, 1.0)
 
 func _on_opacity_changed(alpha: float) -> void:
-	var parent_game := get_parent() as Control
-	if parent_game:
-		parent_game.modulate.a = alpha
+	opacity_slider.set_value_no_signal(alpha * 100.0)
 
 func _on_header_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
