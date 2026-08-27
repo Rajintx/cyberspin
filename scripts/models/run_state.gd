@@ -310,11 +310,11 @@ func _build_master_libraries() -> void:
 func _build_10_floor_enemies() -> void:
 	all_enemy_library.clear()
 
-	# Floor 1: Sector Patrol Drone (50 HP, 10 Shield, 18 💳 Bounty)
+	# Floor 1: Sector Patrol Drone (200 HP, 10 Shield, 18 💳 Bounty)
 	var f1 := EnemyData.new()
 	f1.id = "sec_drone"
 	f1.display_name = "V-9 Patrol Drone"
-	f1.max_hp = 50
+	f1.max_hp = 200
 	f1.starting_shield = 10
 	f1.avatar_glyph = "🤖"
 	f1.theme_color = Color(0.0, 0.85, 1.0)
@@ -328,11 +328,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f1)
 
-	# Floor 2: Security Enforcer Mech (75 HP, 15 Shield, 28 💳 Bounty)
+	# Floor 2: Security Enforcer Mech (300 HP, 15 Shield, 28 💳 Bounty)
 	var f2 := EnemyData.new()
 	f2.id = "corp_enforcer"
 	f2.display_name = "Sector Enforcer Mech"
-	f2.max_hp = 75
+	f2.max_hp = 300
 	f2.starting_shield = 15
 	f2.avatar_glyph = "🦿"
 	f2.theme_color = Color(0.2, 0.6, 1.0)
@@ -346,11 +346,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f2)
 
-	# Floor 3: Cyber-Viper AI (115 HP, 25 Shield, 42 💳 Bounty)
+	# Floor 3: Cyber-Viper AI (460 HP, 25 Shield, 42 💳 Bounty)
 	var f3 := EnemyData.new()
 	f3.id = "cyber_viper"
 	f3.display_name = "Sub-Routine Cyber-Viper"
-	f3.max_hp = 115
+	f3.max_hp = 460
 	f3.starting_shield = 25
 	f3.avatar_glyph = "🐍"
 	f3.theme_color = Color(0.9, 0.1, 0.4)
@@ -365,11 +365,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f3)
 
-	# Floor 4: Assault Sentinel Bot (160 HP, 35 Shield, 45 💳 Bounty)
+	# Floor 4: Assault Sentinel Bot (640 HP, 35 Shield, 45 💳 Bounty)
 	var f4 := EnemyData.new()
 	f4.id = "assault_bot"
 	f4.display_name = "Assault Tank Sentinel"
-	f4.max_hp = 160
+	f4.max_hp = 640
 	f4.starting_shield = 35
 	f4.avatar_glyph = "🛡️"
 	f4.theme_color = Color(1.0, 0.45, 0.0)
@@ -383,11 +383,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f4)
 
-	# Floor 5: ACT 1 APEX MID-BOSS: OVERLORD PRIME (2 Stages, 340 EHP, 90 💳 Bounty)
+	# Floor 5: ACT 1 APEX MID-BOSS: OVERLORD PRIME (2 Stages, 1,080 HP, 90 💳 Bounty)
 	var f5 := EnemyData.new()
 	f5.id = "overlord_prime"
 	f5.display_name = "OVERLORD PRIME // STAGE 1"
-	f5.max_hp = 120
+	f5.max_hp = 480
 	f5.starting_shield = 30
 	f5.avatar_glyph = "👁️"
 	f5.theme_color = Color(1.0, 0.05, 0.3)
@@ -404,14 +404,14 @@ func _build_10_floor_enemies() -> void:
 		{
 			"name": "OVERLORD PRIME // STAGE 1",
 			"avatar": "👁️",
-			"hp": 120,
+			"hp": 480,
 			"shield": 30,
 			"intents": f5.intent_sequence
 		},
 		{
 			"name": "OVERLORD PRIME [STAGE 2: MELTDOWN CORE]",
 			"avatar": "💀",
-			"hp": 150,
+			"hp": 600,
 			"shield": 40,
 			"intents": [
 				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Meltdown Spikes", "desc": "Plants 3 📌 Spikes (15 DMG)!"},
@@ -423,11 +423,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f5)
 
-	# Floor 6: Quantum Sentinel (325 HP, 65 Shield, 75 💳 Bounty)
+	# Floor 6: Quantum Sentinel (1,300 HP, 65 Shield, 75 💳 Bounty)
 	var f6 := EnemyData.new()
 	f6.id = "quantum_sentinel"
 	f6.display_name = "Quantum Phase Sentinel"
-	f6.max_hp = 325
+	f6.max_hp = 1300
 	f6.starting_shield = 65
 	f6.avatar_glyph = "💠"
 	f6.theme_color = Color(0.3, 0.9, 1.0)
@@ -441,11 +441,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f6)
 
-	# Floor 7: Nano-Swarm Hivemind (475 HP, 95 Shield, 100 💳 Bounty)
+	# Floor 7: Nano-Swarm Hivemind (1,900 HP, 95 Shield, 100 💳 Bounty)
 	var f7 := EnemyData.new()
 	f7.id = "nano_swarm"
 	f7.display_name = "Nano-Swarm Hivemind AI"
-	f7.max_hp = 475
+	f7.max_hp = 1900
 	f7.starting_shield = 95
 	f7.avatar_glyph = "🐝"
 	f7.theme_color = Color(0.8, 0.2, 1.0)
@@ -460,11 +460,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f7)
 
-	# Floor 8: Aegis Leviathan Carrier (680 HP, 140 Shield, 130 💳 Bounty)
+	# Floor 8: Aegis Leviathan Carrier (2,720 HP, 140 Shield, 130 💳 Bounty)
 	var f8 := EnemyData.new()
 	f8.id = "aegis_leviathan"
 	f8.display_name = "Aegis Leviathan Dreadnought"
-	f8.max_hp = 680
+	f8.max_hp = 2720
 	f8.starting_shield = 140
 	f8.avatar_glyph = "🛸"
 	f8.theme_color = Color(1.0, 0.4, 0.0)
@@ -479,11 +479,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f8)
 
-	# Floor 9: Corporate Citadel Core (980 HP, 190 Shield, 165 💳 Bounty)
+	# Floor 9: Corporate Citadel Core (3,920 HP, 190 Shield, 165 💳 Bounty)
 	var f9 := EnemyData.new()
 	f9.id = "citadel_core"
 	f9.display_name = "Citadel Command AI"
-	f9.max_hp = 980
+	f9.max_hp = 3920
 	f9.starting_shield = 190
 	f9.avatar_glyph = "🏰"
 	f9.theme_color = Color(1.0, 0.15, 0.4)
@@ -498,11 +498,11 @@ func _build_10_floor_enemies() -> void:
 	]
 	all_enemy_library.append(f9)
 
-	# Floor 10: FINAL OMEGA NEXUS CORE (3 Stages, 2,020 EHP, 300 💳 Bounty)
+	# Floor 10: FINAL OMEGA NEXUS CORE (3 Stages, 6,600 HP, 300 💳 Bounty)
 	var f10 := EnemyData.new()
 	f10.id = "omega_nexus"
 	f10.display_name = "OMEGA NEXUS // STAGE 1: CITADEL"
-	f10.max_hp = 450
+	f10.max_hp = 1800
 	f10.starting_shield = 100
 	f10.avatar_glyph = "👁️"
 	f10.theme_color = Color(1.0, 0.05, 0.3)
@@ -519,14 +519,14 @@ func _build_10_floor_enemies() -> void:
 		{
 			"name": "OMEGA NEXUS // STAGE 1: CITADEL",
 			"avatar": "👁️",
-			"hp": 450,
+			"hp": 1800,
 			"shield": 100,
 			"intents": f10.intent_sequence
 		},
 		{
 			"name": "OMEGA NEXUS [STAGE 2: NEURAL SINGULARITY]",
 			"avatar": "🌌",
-			"hp": 550,
+			"hp": 2200,
 			"shield": 120,
 			"intents": [
 				{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "God-Malware Overwrite", "desc": "Infects 3 slots with ☣️ Poison (10 CR/turn)!"},
@@ -538,7 +538,7 @@ func _build_10_floor_enemies() -> void:
 		{
 			"name": "OMEGA NEXUS [STAGE 3: THE ARCHITECT]",
 			"avatar": "👑",
-			"hp": 650,
+			"hp": 2600,
 			"shield": 150,
 			"intents": [
 				{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 4, "name": "Apocalypse Grid", "desc": "Plants 4 📌 Spikes (20 DMG)!"},
@@ -554,7 +554,7 @@ func get_mimic_enemy() -> EnemyData:
 	var mimic := EnemyData.new()
 	mimic.id = "trojan_mimic"
 	mimic.display_name = "TROJAN MIMIC MECH"
-	mimic.max_hp = 110
+	mimic.max_hp = 440
 	mimic.starting_shield = 25
 	mimic.avatar_glyph = "📦"
 	mimic.theme_color = Color(0.9, 0.2, 1.0)
