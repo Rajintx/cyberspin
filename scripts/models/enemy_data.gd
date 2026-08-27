@@ -2,17 +2,18 @@ class_name EnemyData
 extends Resource
 
 enum IntentType {
-	ATTACK,       # Hits player Shield / Bankroll
-	MULTI_ATTACK, # Multiple rapid hits (e.g. 3x 8 DMG)
-	HEAVY_ATTACK, # Massive telegraphed strike (e.g. 35+ DMG)
-	SHIELD_UP,    # Gains firewall armor
-	CORRUPT_REEL, # Locks / disables specific perimeter reels next spin
-	OVERHEAT_DOT, # Inflicts burn on player
-	BUFF_ATTACK   # Increases attack power for future turns
+	ATTACK,            # Direct cyber hit
+	MULTI_ATTACK,      # Rapid burst hits
+	HEAVY_ATTACK,      # Massive telegraphed strike
+	SHIELD_UP,         # Deploys Firewall defense
+	CORRUPT_REEL,      # Glitch locks perimeter reels
+	PLANT_SPIKES,      # 📌 Plants Data Spikes on perimeter tiles (damages bankroll when landed)
+	INJECT_POISON,     # ☣️ Injects Poison Malware onto perimeter tiles (drains bankroll per turn)
+	DETONATE_HAZARDS   # 💥 Triggers and overclocks all active tile hazards on the board
 }
 
 @export var id: String = "sec_drone"
-@export var display_name: String = "V-9 Security Drone"
+@export var display_name: String = "V-9 Patrol Drone"
 @export var max_hp: int = 70
 @export var starting_shield: int = 15
 @export var avatar_glyph: String = "🤖"
@@ -24,31 +25,31 @@ enum IntentType {
 
 @export var intent_sequence: Array[Dictionary] = [
 	{
-		"type": IntentType.ATTACK,
-		"value": 10,
+		"type": IntentType.PLANT_SPIKES,
+		"value": 1,
 		"hits": 1,
-		"name": "Pulse Cannon",
-		"desc": "Fires a concentrated laser dealing 10 Cyber Damage."
+		"name": "Spike Emitter",
+		"desc": "Arms 1 orbital slot with a 📌 Data Spike (10 DMG on landing)."
 	},
 	{
 		"type": IntentType.SHIELD_UP,
-		"value": 15,
+		"value": 14,
 		"hits": 1,
 		"name": "Deflection Matrix",
-		"desc": "Deploys +15 Firewall Shield."
+		"desc": "Deploys +14 Firewall Shield."
+	},
+	{
+		"type": IntentType.INJECT_POISON,
+		"value": 1,
+		"hits": 1,
+		"name": "Malware Worm",
+		"desc": "Infects 1 orbital slot with ☣️ Poison (drains 6 Credits/turn)."
 	},
 	{
 		"type": IntentType.ATTACK,
-		"value": 16,
+		"value": 12,
 		"hits": 1,
-		"name": "Charged Burst",
-		"desc": "Deals 16 Heavy Cyber Damage."
-	},
-	{
-		"type": IntentType.CORRUPT_REEL,
-		"value": 2,
-		"hits": 1,
-		"name": "EMP Shockwave",
-		"desc": "Glitch locks 2 random orbital slots next spin!"
+		"name": "Charged Blaster",
+		"desc": "Fires a 12 DMG Cyber Laser."
 	}
 ]

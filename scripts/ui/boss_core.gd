@@ -122,6 +122,18 @@ func update_intent_display() -> void:
 			intent_icon.text = "⚡"
 			intent_desc.text = "EMP LOCK %d" % val
 			intent_badge.modulate = Color(1.0, 0.8, 0.1)
+		EnemyData.IntentType.PLANT_SPIKES:
+			intent_icon.text = "📌"
+			intent_desc.text = "SPIKES %d" % val
+			intent_badge.modulate = Color(1.0, 0.2, 0.35)
+		EnemyData.IntentType.INJECT_POISON:
+			intent_icon.text = "☣️"
+			intent_desc.text = "POISON %d" % val
+			intent_badge.modulate = Color(0.8, 0.2, 1.0)
+		EnemyData.IntentType.DETONATE_HAZARDS:
+			intent_icon.text = "💥"
+			intent_desc.text = "DETONATE %d" % val
+			intent_badge.modulate = Color(1.0, 0.5, 0.0)
 		_:
 			intent_icon.text = "⚠️"
 			intent_desc.text = intent.get("name", "Action")

@@ -52,6 +52,7 @@ func start_combat(enemy: EnemyData) -> void:
 		RunState.restore_ram(RunState.max_ram)
 
 	boss_core.init_enemy(enemy)
+	orbital_slot_machine.clear_all_hazards()
 	orbital_slot_machine.clear_all_corruptions()
 	orbital_slot_machine.populate_initial_grid(RunState.symbol_deck)
 	orbital_slot_machine.set_controls_enabled(true)
@@ -153,15 +154,43 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 		RunState.add_credits(creds)
 		_log("[color=#ffcc00]💰 Payout Received: +%d Credits to Bankroll![/color]" % creds)
 
-	# Check for boss defeat
+	# 2. Check and Trigger Active Tile Hazards (Spikes & Poison)
+	_resolve_tile_hazards()
+
+	# Check for player defeat or boss defeat
+	if RunState.credits <= 0:
+		is_resolving_turn = false
+		return
 	if boss_core.current_hp <= 0:
 		is_resolving_turn = false
 		return
 
-	# 2. Boss Turn Execution after delay scaled by game speed
+	# 3. Boss Turn Execution after delay scaled by game speed
 	var spd := RunState.game_speed
 	var enemy_timer := get_tree().create_timer(0.7 / spd)
 	enemy_timer.timeout.connect(_execute_boss_turn)
+
+func _resolve_tile_hazards() -> void:
+	var total_spike_dmg: int = 0
+	var total_poison_drain: int = 0
+
+	for i in range(8):
+		var tile: SlotTile = orbital_slot_machine.slot_tiles[i]
+		if tile.hazard_type == SlotTile.HazardType.SPIKE:
+			total_spike_dmg += 10
+			tile.play_hazard_trigger_fx()
+			tile.clear_hazard() # Spike pops after trigger
+		elif tile.hazard_type == SlotTile.HazardType.POISON:
+			total_poison_drain += 6
+			tile.play_hazard_trigger_fx()
+
+	if total_spike_dmg > 0:
+		_log("[color=#ff0044]📌 Data Spike triggered! Inflicted %d damage to Bankroll![/color]" % total_spike_dmg)
+		_apply_damage_to_player(total_spike_dmg)
+
+	if total_poison_drain > 0:
+		_log("[color=#aa00ff]☣️ Malware Leech drained %d Credits from Bankroll![/color]" % total_poison_drain)
+		_apply_damage_to_player(total_poison_drain)
 
 func _execute_boss_turn() -> void:
 	if boss_core.current_hp <= 0:
@@ -185,6 +214,16 @@ func _execute_boss_turn() -> void:
 	var intent_name: String = intent.get("name", "Action")
 
 	match type_val:
+		EnemyData.IntentType.PLANT_SPIKES:
+			_log("[color=#ff2255]📌 Boss deploys %s! Armed %d orbital slots with Data Spikes.[/color]" % [intent_name, val])
+			_plant_hazard_on_random_tiles(SlotTile.HazardType.SPIKE, val)
+		EnemyData.IntentType.INJECT_POISON:
+			_log("[color=#aa22ff]☣️ Boss injects %s! Infected %d orbital slots with Malware Poison.[/color]" % [intent_name, val])
+			_plant_hazard_on_random_tiles(SlotTile.HazardType.POISON, val)
+		EnemyData.IntentType.DETONATE_HAZARDS:
+			_log("[color=#ff6600]💥 Boss executes %s! Detonates board hazards + %d DMG.[/color]" % [intent_name, val])
+			_apply_damage_to_player(val)
+			_resolve_tile_hazards()
 		EnemyData.IntentType.ATTACK, EnemyData.IntentType.HEAVY_ATTACK:
 			_log("[color=#ff3366]⚔️ Boss uses %s! Deals %d Cyber Damage.[/color]" % [intent_name, val])
 			_apply_damage_to_player(val)
@@ -205,6 +244,19 @@ func _execute_boss_turn() -> void:
 	# Re-enable player controls for next spin if player still alive
 	if RunState.credits > 0 and boss_core.current_hp > 0:
 		orbital_slot_machine.set_controls_enabled(true)
+
+func _plant_hazard_on_random_tiles(hazard: SlotTile.HazardType, count: int) -> void:
+	var available_indices: Array[int] = []
+	for i in range(8):
+		if orbital_slot_machine.slot_tiles[i].hazard_type == SlotTile.HazardType.NONE:
+			available_indices.append(i)
+
+	available_indices.shuffle()
+	for i in range(mini(count, available_indices.size())):
+		var idx: int = available_indices[i]
+		orbital_slot_machine.set_slot_hazard(idx, hazard)
+
+	AudioSynth.play_emp()
 
 func _apply_damage_to_player(amount: int) -> void:
 	var remaining_dmg := RunState.take_damage_direct(amount)

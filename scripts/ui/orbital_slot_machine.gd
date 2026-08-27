@@ -14,6 +14,7 @@ signal lock_toggled(index: int, is_locked: bool)
 @onready var info_banner: Label = %InfoBanner
 
 # Quick Hack Action Buttons
+@onready var purge_btn: Button = %PurgeBtn
 @onready var reroll_btn: Button = %RerollBtn
 @onready var overdrive_btn: Button = %OverdriveBtn
 @onready var bet_toggle_btn: Button = %BetToggleBtn
@@ -42,6 +43,7 @@ func _ready() -> void:
 	payline_canvas.draw.connect(_on_payline_canvas_draw)
 	_lever_initial_pos = lever_handle.position
 
+	purge_btn.pressed.connect(_on_purge_pressed)
 	reroll_btn.pressed.connect(_on_reroll_pressed)
 	overdrive_btn.pressed.connect(_on_overdrive_pressed)
 	bet_toggle_btn.pressed.connect(_on_bet_toggle_pressed)
@@ -64,6 +66,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			var slot_idx: int = event.keycode - KEY_1
 			if slot_idx < 8 and not is_spinning:
 				_on_tile_lock_toggled(slot_idx, not locked_indices[slot_idx])
+		elif event.keycode == KEY_C and can_spin and not is_spinning:
+			_on_purge_pressed()
 		elif event.keycode == KEY_R and can_spin and not is_spinning:
 			_on_reroll_pressed()
 		elif event.keycode == KEY_O and can_spin and not is_spinning:
@@ -104,6 +108,7 @@ func set_controls_enabled(enabled: bool) -> void:
 	can_spin = enabled
 	spin_button.disabled = not enabled
 	lever_knob.disabled = not enabled
+	purge_btn.disabled = not enabled
 	reroll_btn.disabled = not enabled
 	overdrive_btn.disabled = not enabled
 	bet_toggle_btn.disabled = not enabled
@@ -126,11 +131,32 @@ func _on_tile_lock_toggled(slot_index: int, is_locked: bool) -> void:
 		slot_tiles[slot_index].set_locked(false)
 		lock_toggled.emit(slot_index, false)
 
+func _on_purge_pressed() -> void:
+	if is_spinning or not can_spin:
+		return
+
+	var has_hazards: bool = false
+	for tile in slot_tiles:
+		if tile.hazard_type != SlotTile.HazardType.NONE:
+			has_hazards = true
+			break
+
+	if not has_hazards:
+		show_banner("✨ No active hazards to cleanse!")
+		return
+
+	if RunState.spend_ram(1):
+		AudioSynth.play_shield()
+		clear_all_hazards()
+		show_banner("🧹 CLEANSED: All Spikes & Poison purged from grid!")
+	else:
+		show_banner("⚠️ NOT ENOUGH RAM TO CLEANSE! (Cost: 1 RAM)")
+
 func _on_reroll_pressed() -> void:
 	if is_spinning or not can_spin:
 		return
 	if RunState.spend_ram(2):
-		AudioSynth.play_tone(700, 1100, 0.15, -4.0, "saw")
+		AudioSynth.play_laser()
 		show_banner("🎲 HACK REROLL: Unlocked reels respun!")
 		_execute_spin_visuals(false)
 	else:
@@ -142,7 +168,6 @@ func _on_overdrive_pressed() -> void:
 	if RunState.spend_ram(3):
 		AudioSynth.play_jackpot()
 		show_banner("⚡ OVERDRIVE: Laser Cross-Beam Guaranteed!")
-		# Place matching heavy attack chips on opposite vertical slots
 		var heavy_laser := RunState.get_symbol_by_id("laser")
 		if heavy_laser:
 			active_symbols[1] = heavy_laser.duplicate()
@@ -165,7 +190,7 @@ func _on_speed_toggle_pressed() -> void:
 	RunState.cycle_game_speed()
 
 func _on_bet_changed(level: int, ante_cost: int, mult: float) -> void:
-	bet_toggle_btn.text = "💰 BET: %d💳 (x%.1f)" % [ante_cost, mult]
+	bet_toggle_btn.text = "💰 %d💳 (x%.1f)" % [ante_cost, mult]
 	if level == 1:
 		bet_toggle_btn.modulate = Color(0.8, 0.9, 1.0)
 	elif level == 2:
@@ -183,10 +208,13 @@ func show_banner(text: String) -> void:
 	t.tween_interval(1.8)
 	t.tween_property(info_banner, "modulate:a", 0.0, 0.4)
 
-func set_slot_corrupted(slot_index: int, corrupted: bool) -> void:
+func set_slot_hazard(slot_index: int, hazard: SlotTile.HazardType) -> void:
 	if slot_index >= 0 and slot_index < 8:
-		corrupted_indices[slot_index] = corrupted
-		slot_tiles[slot_index].set_corrupted(corrupted)
+		slot_tiles[slot_index].set_hazard(hazard)
+
+func clear_all_hazards() -> void:
+	for i in range(8):
+		slot_tiles[i].clear_hazard()
 
 func clear_all_corruptions() -> void:
 	for i in range(8):

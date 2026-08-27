@@ -164,7 +164,19 @@ layout_mode = 2
 
 [node name="ActionsBar" type="HBoxContainer" parent="Chassis/Margin/MainLayout/SlotArea"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 5
+
+[node name="PurgeBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_color = Color(0.2, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 9
+theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
+text = "🧹 CLEANSE (1💾)"
+tooltip_text = "Spend 1 RAM to purge all Spikes and Poison hazards from all tiles! [C]"
 
 [node name="RerollBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
 unique_name_in_owner = true
@@ -172,7 +184,7 @@ custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
 text = "🎲 REROLL (2💾)"
 tooltip_text = "Spend 2 RAM to respin all unlocked reels without taking enemy damage. [R]"
@@ -183,7 +195,7 @@ custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
 text = "⚡ OVERDRIVE (3💾)"
 tooltip_text = "Spend 3 RAM to lock matching laser chips for guaranteed Cross-Core Piercer! [O]"
@@ -195,18 +207,18 @@ layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
-text = "💰 BET: 5💳 (x1.0)"
+text = "💰 5💳 (x1.0)"
 tooltip_text = "Cycle bet ante & multiplier: Standard (5) / Overdrive (10) / Hyper (20). [B]"
 
 [node name="SpeedToggleBtn" type="Button" parent="Chassis/Margin/MainLayout/SlotArea/ActionsBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 28)
+custom_minimum_size = Vector2(48, 28)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_btn")
 text = "⏩ 1.0X"
 tooltip_text = "Combat animation speed toggle (1x / 1.5x / 2.5x). [Tab]"

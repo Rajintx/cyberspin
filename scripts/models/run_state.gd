@@ -324,9 +324,10 @@ func _build_enemies() -> void:
 	drone.credits_reward = 35
 	drone.flavor_quote = "SCANNING SECTOR... PIRATE TERMINAL ISOLATED."
 	drone.intent_sequence = [
-		{"type": EnemyData.IntentType.ATTACK, "value": 8, "hits": 1, "name": "Pulse Cannon", "desc": "Deals 8 Cyber Damage."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 14, "hits": 1, "name": "Deflection Matrix", "desc": "Deploys +14 Shield."},
-		{"type": EnemyData.IntentType.ATTACK, "value": 14, "hits": 1, "name": "Overcharge Blaster", "desc": "Deals 14 Cyber Damage."}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 1, "name": "Spike Emitter", "desc": "Plants a 📌 Data Spike on 1 orbital slot (10 DMG on landing)."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 14, "name": "Deflection Matrix", "desc": "Deploys +14 Shield."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 1, "name": "Malware Injector", "desc": "Plants a ☣️ Poison trap on 1 slot (drains 6 Credits/turn)."},
+		{"type": EnemyData.IntentType.ATTACK, "value": 10, "name": "Pulse Blaster", "desc": "Fires a 10 DMG Cyber Laser."}
 	]
 	all_enemy_library.append(drone)
 
@@ -341,10 +342,10 @@ func _build_enemies() -> void:
 	enforcer.credits_reward = 50
 	enforcer.flavor_quote = "SURRENDER TERMINAL ASSETS TO CORPORATE POLICE."
 	enforcer.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Minefield", "desc": "Plants 📌 Data Spikes on 2 orbital slots!"},
 		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 3, "name": "Burst Fire", "desc": "Fires 3 rapid lasers (3x 5 = 15 DMG)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 20, "hits": 1, "name": "Heavy Plating", "desc": "Deploys +20 Security Armor."},
-		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 2, "hits": 1, "name": "EMP Shock", "desc": "Locks 2 random orbital slots!"},
-		{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 22, "hits": 1, "name": "Hydraulic Impact", "desc": "Massive crushing blow dealing 22 DMG!"}
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Toxic Gas Vent", "desc": "Infects 2 orbital slots with ☣️ Poison!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 20, "name": "Heavy Plating", "desc": "Deploys +20 Armor."}
 	]
 	all_enemy_library.append(enforcer)
 
@@ -360,10 +361,10 @@ func _build_enemies() -> void:
 	viper.credits_reward = 80
 	viper.flavor_quote = "HOSTILE INTEL DETECTED. PURGE PROTOCOL ACTIVE."
 	viper.intent_sequence = [
-		{"type": EnemyData.IntentType.ATTACK, "value": 14, "hits": 1, "name": "Neuro-Fang", "desc": "Deals 14 Cyber Damage and injects Overheat."},
-		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 3, "hits": 1, "name": "Synapse Corruptor", "desc": "Disables 3 random orbital reels!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 7, "hits": 3, "name": "Venom Flurry", "desc": "3 rapid strikes dealing 21 total DMG!"},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 28, "hits": 1, "name": "Hardened Shell", "desc": "Deploys +28 Nano-Shield."}
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Neuro-Venom", "desc": "Infects 2 slots with ☣️ Poison and inflicts Overheat."},
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Net", "desc": "Plants 📌 Spikes on 2 slots!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 12, "name": "Synapse Detonator", "desc": "💥 Detonates all active tile hazards on board for double damage!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 28, "name": "Hardened Shell", "desc": "Deploys +28 Nano-Shield."}
 	]
 	all_enemy_library.append(viper)
 
@@ -379,10 +380,10 @@ func _build_enemies() -> void:
 	leviathan.credits_reward = 110
 	leviathan.flavor_quote = "COMMENCING TOTAL SECTOR AIRSPACE LOCKDOWN."
 	leviathan.intent_sequence = [
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 8, "hits": 4, "name": "Gatling Lasers", "desc": "4 heavy laser blasts (4x 8 = 32 DMG)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 38, "hits": 1, "name": "Fortress Matrix", "desc": "Deploys +38 Heavy Shield."},
-		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 3, "hits": 1, "name": "EMP Blast", "desc": "Disables 3 random reels!"},
-		{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 36, "hits": 1, "name": "Particle Lance", "desc": "Super-charged laser lance dealing 36 DMG!"}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Orbital Spike Launcher", "desc": "Plants 📌 Spikes across 3 orbital slots!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 7, "hits": 4, "name": "Gatling Lasers", "desc": "4 heavy laser blasts (4x 7 = 28 DMG)."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Bio-Plague Corruptor", "desc": "Infects 2 slots with ☣️ Poison!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 18, "name": "Particle Shockwave", "desc": "💥 Deals 18 DMG and triggers all board hazards!"}
 	]
 	all_enemy_library.append(leviathan)
 
@@ -398,10 +399,10 @@ func _build_enemies() -> void:
 	mainframe.credits_reward = 250
 	mainframe.flavor_quote = "I AM THE FOUNDATION OF REALITY. YOU CANNOT BREACH THIS NEXUS."
 	mainframe.intent_sequence = [
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 45, "hits": 1, "name": "Firewall Fortress", "desc": "Deploys +45 Security Shield."},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 11, "hits": 3, "name": "Orbital Triad", "desc": "Fires 3 orbital beams (3x 11 = 33 DMG)."},
-		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 4, "hits": 1, "name": "System Override", "desc": "Corrupts 4 random orbital reels!"},
-		{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 45, "hits": 1, "name": "EXECUTE_PURGE()", "desc": "Ultimate Overclock Strike dealing 45 Damage!"}
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Quantum Spike Matrix", "desc": "Arms 3 slots with 📌 Data Spikes!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Apex Malware Infestation", "desc": "Infects 3 slots with ☣️ Poison!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 25, "name": "SYSTEM_DETONATE()", "desc": "💥 Deals 25 DMG and detonates all board hazards!"},
+		{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 45, "name": "EXECUTE_PURGE()", "desc": "Ultimate Overclock Strike dealing 45 DMG!"}
 	]
 	all_enemy_library.append(mainframe)
 

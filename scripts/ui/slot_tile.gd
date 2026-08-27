@@ -3,12 +3,19 @@ extends PanelContainer
 
 signal lock_toggled(slot_index: int, is_locked: bool)
 
+enum HazardType {
+	NONE,
+	SPIKE,   # 📌 Data Spike: Deals direct damage to Shield/Bankroll upon reel landing!
+	POISON   # ☣️ Malware Leech: Drains bankroll every turn and can infect neighbors!
+}
+
 @export var slot_index: int = 0
 
 var current_symbol: SymbolData
 var is_locked: bool = false
 var is_corrupted: bool = false
 var is_spinning: bool = false
+var hazard_type: HazardType = HazardType.NONE
 
 @onready var icon_label: Label = %IconLabel
 @onready var name_label: Label = %NameLabel
@@ -17,6 +24,8 @@ var is_spinning: bool = false
 @onready var lock_button: Button = %LockButton
 @onready var glow_rect: ColorRect = %GlowRect
 @onready var corrupt_overlay: ColorRect = %CorruptOverlay
+@onready var hazard_overlay: ColorRect = %HazardOverlay
+@onready var hazard_badge: Label = %HazardBadge
 
 var _base_style: StyleBoxFlat
 
@@ -26,6 +35,8 @@ func _ready() -> void:
 	lock_button.toggled.connect(_on_lock_button_toggled)
 	glow_rect.modulate.a = 0.0
 	corrupt_overlay.visible = false
+	hazard_overlay.visible = false
+	hazard_badge.visible = false
 	mult_label.visible = false
 
 func set_symbol(sym: SymbolData, multiplier: float = 1.0) -> void:
@@ -61,15 +72,57 @@ func set_symbol(sym: SymbolData, multiplier: float = 1.0) -> void:
 		mult_label.visible = false
 		value_label.modulate = Color(0.9, 0.9, 1.0)
 
-	tooltip_text = "[%s]\nType: %s\nChips: %d | Mult: +%.1f\n%s" % [
-		sym.display_name,
-		sym.get_type_name(),
-		sym.base_chips,
-		sym.mult_add,
-		sym.description
-	]
+	_update_tooltip()
+	_update_visual_styling()
 
-	_update_border_color(sym.icon_color)
+func set_hazard(hazard: HazardType) -> void:
+	hazard_type = hazard
+	_update_visual_styling()
+	_update_tooltip()
+
+func clear_hazard() -> void:
+	hazard_type = HazardType.NONE
+	_update_visual_styling()
+	_update_tooltip()
+
+func _update_visual_styling() -> void:
+	if hazard_type == HazardType.SPIKE:
+		hazard_overlay.visible = true
+		hazard_overlay.color = Color(1.0, 0.1, 0.25, 0.35)
+		hazard_badge.visible = true
+		hazard_badge.text = "📌"
+		_update_border_color(Color(1.0, 0.2, 0.3))
+	elif hazard_type == HazardType.POISON:
+		hazard_overlay.visible = true
+		hazard_overlay.color = Color(0.6, 0.1, 1.0, 0.35)
+		hazard_badge.visible = true
+		hazard_badge.text = "☣️"
+		_update_border_color(Color(0.8, 0.2, 1.0))
+	else:
+		hazard_overlay.visible = false
+		hazard_badge.visible = false
+		if current_symbol:
+			_update_border_color(current_symbol.icon_color)
+		else:
+			_update_border_color(Color(0.2, 0.2, 0.3, 0.4))
+
+func _update_tooltip() -> void:
+	var base_tip: String = ""
+	if current_symbol:
+		base_tip = "[%s]\nType: %s\nChips: %d | Mult: +%.1f\n%s" % [
+			current_symbol.display_name,
+			current_symbol.get_type_name(),
+			current_symbol.base_chips,
+			current_symbol.mult_add,
+			current_symbol.description
+		]
+
+	if hazard_type == HazardType.SPIKE:
+		base_tip += "\n\n⚠️ [📌 SPIKE TRAP ARMED]\nWhen reel settles here, triggers 10 direct damage to Firewall/Bankroll!"
+	elif hazard_type == HazardType.POISON:
+		base_tip += "\n\n☣️ [MALWARE POISON INFESTATION]\nDrains 6 Credits on each turn and may spread to adjacent reels!"
+
+	tooltip_text = base_tip
 
 func _update_border_color(color: Color) -> void:
 	if _base_style:
@@ -112,6 +165,12 @@ func highlight_synergy(col: Color = Color.WHITE) -> void:
 	var tween := create_tween()
 	tween.tween_property(glow_rect, "modulate:a", 0.6, 0.15)
 	tween.tween_property(glow_rect, "modulate:a", 0.0, 0.3)
+
+func play_hazard_trigger_fx() -> void:
+	var tween := create_tween()
+	hazard_overlay.modulate.a = 1.0
+	tween.tween_property(hazard_overlay, "modulate:a", 0.3, 0.25)
+	AudioSynth.play_boss_hit()
 
 func set_corrupted(corrupted: bool) -> void:
 	is_corrupted = corrupted
