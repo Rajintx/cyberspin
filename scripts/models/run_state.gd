@@ -707,10 +707,6 @@ func spend_spin_bet() -> bool:
 		credits -= cost
 		bankroll_changed.emit(credits, max_bankroll_seen)
 		return true
-	if credits > 0:
-		credits = 0
-		bankroll_changed.emit(credits, max_bankroll_seen)
-		return true
 	return false
 
 func get_ram_upgrade_cost() -> int:

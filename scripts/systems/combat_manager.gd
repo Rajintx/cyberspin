@@ -26,6 +26,9 @@ func _ready() -> void:
 	boss_core = orbital_slot_machine.boss_core
 	orbital_slot_machine.spin_requested.connect(_on_spin_requested)
 	orbital_slot_machine.spin_completed.connect(_on_spin_completed)
+	orbital_slot_machine.spin_failed_bankrupt.connect(func():
+		_check_player_bankrupt()
+	)
 	boss_core.boss_died.connect(_on_boss_died)
 	boss_core.stage_transitioned.connect(_on_stage_transitioned)
 
@@ -59,12 +62,15 @@ func start_combat(enemy: EnemyData) -> void:
 	orbital_slot_machine.clear_all_hazards()
 	orbital_slot_machine.clear_all_corruptions()
 	orbital_slot_machine.populate_initial_grid(RunState.symbol_deck)
-	orbital_slot_machine.set_controls_enabled(true)
 
 	floor_label.text = "FLOOR %d/10 // %s" % [RunState.current_floor, enemy.display_name.to_upper()]
 	_log("[color=#00f0ff]=== ENGAGING ENEMY: %s ===[/color]" % enemy.display_name)
 	_log("[color=#8888aa]\"%s\"[/color]" % enemy.flavor_quote)
 	_update_all_hud()
+
+	if _check_player_bankrupt():
+		return
+	orbital_slot_machine.set_controls_enabled(true)
 
 func _update_all_hud() -> void:
 	_on_bankroll_changed(RunState.credits, RunState.max_bankroll_seen)
@@ -117,7 +123,7 @@ func _on_spin_requested() -> void:
 		_log("[color=#cc33ff]☣️ Data Virus triggered! Dealt %d Bleed DMG to Core.[/color]" % virus_dmg)
 
 func _on_spin_completed(eval_result: Dictionary) -> void:
-	if boss_core.current_hp <= 0 or RunState.credits <= 0:
+	if not is_instance_valid(boss_core) or boss_core.current_hp <= 0 or RunState.credits <= 0:
 		return
 
 	is_resolving_turn = true
@@ -177,7 +183,7 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 	_resolve_tile_hazards()
 
 	# Check for player defeat or boss defeat
-	if RunState.credits <= 0:
+	if _check_player_bankrupt():
 		is_resolving_turn = false
 		return
 	if not is_instance_valid(boss_core) or boss_core.current_hp <= 0:
@@ -280,9 +286,21 @@ func _execute_boss_turn() -> void:
 	RunState.start_new_battle_turn()
 	is_resolving_turn = false
 
-	# Re-enable player controls for next spin if player still alive
-	if RunState.credits > 0 and boss_core.current_hp > 0:
+	# Re-enable player controls if player is alive and can afford next spin
+	if _check_player_bankrupt():
+		return
+
+	if is_instance_valid(boss_core) and boss_core.current_hp > 0:
 		orbital_slot_machine.set_controls_enabled(true)
+
+func _check_player_bankrupt() -> bool:
+	var ante_cost := RunState.get_current_spin_cost()
+	if RunState.credits <= 0 or RunState.credits < ante_cost:
+		_log("[color=#ff0000]☠️ BANKRUPTCY: TERMINAL BANKROLL (%d 💳) INSUFFICIENT FOR SPIN ANTE (%d 💳).[/color]" % [RunState.credits, ante_cost])
+		orbital_slot_machine.set_controls_enabled(false)
+		combat_lost.emit()
+		return true
+	return false
 
 func _plant_hazard_on_random_tiles(hazard: SlotTile.HazardType, count: int) -> void:
 	var available_indices: Array[int] = []
@@ -314,10 +332,7 @@ func _apply_damage_to_player(amount: int) -> void:
 				spawn_floating_text("⚡ -%d REFLECT" % reflected, Color(0.0, 1.0, 0.5), boss_core.global_position + Vector2(40, 20))
 				_log("[color=#00ff88]⚡ Kinetic Reflector! Absorbed shield dealt %d laser counter-damage to Boss![/color]" % reflected)
 
-	if RunState.credits <= 0:
-		_log("[color=#ff0000]☠️ BANKRUPTCY: TERMINAL BANKROLL DEPLETED.[/color]")
-		orbital_slot_machine.set_controls_enabled(false)
-		combat_lost.emit()
+	_check_player_bankrupt()
 
 func _corrupt_random_reels(count: int) -> void:
 	var indices: Array[int] = [0, 1, 2, 3, 4, 5, 6, 7]

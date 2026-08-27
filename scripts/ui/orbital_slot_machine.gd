@@ -4,6 +4,7 @@ extends Control
 signal spin_requested()
 signal spin_completed(eval_result: Dictionary)
 signal lock_toggled(index: int, is_locked: bool)
+signal spin_failed_bankrupt()
 
 @onready var grid_container: GridContainer = %GridContainer
 @onready var boss_core: BossCore = %BossCore
@@ -256,7 +257,9 @@ func pull_lever_and_spin() -> void:
 
 	# Deduct spin ante from bankroll
 	if not RunState.spend_spin_bet():
-		show_banner("☠️ BANKRUPT! Insufficient Credits for spin ante!")
+		show_banner("☠️ BANKRUPT! Insufficient Credits (%d💳) for spin ante (%d💳)!" % [RunState.credits, RunState.get_current_spin_cost()])
+		set_controls_enabled(false)
+		spin_failed_bankrupt.emit()
 		return
 
 	RunState.total_spins += 1
