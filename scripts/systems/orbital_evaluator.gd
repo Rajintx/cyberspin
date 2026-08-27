@@ -140,9 +140,9 @@ static func evaluate_spin(
 			SymbolData.SymbolType.JACKPOT:
 				raw_attack_chips += int(round(sym.base_chips * slot_mult))
 				total_attack_mult += sym.mult_add
-				var j_payout: int = int(round(25 * slot_mult * bet_mult))
+				var j_payout: int = int(round(6 * slot_mult * bet_mult))
 				result.credits_earned += j_payout
-				result.total_shield += int(round(12 * slot_mult))
+				result.total_shield += int(round(6 * slot_mult))
 
 	# Compute Total Attack Damage = (Chips x Mult) x BetMult x FeverMult
 	if raw_attack_chips > 0:
@@ -184,9 +184,9 @@ static func _check_cross_pair(idx_a: int, idx_b: int, line_name: String, symbols
 		elif a.symbol_type == SymbolData.SymbolType.SHIELD:
 			bonus_shield = int(round(12 * bet_mult))
 		elif a.symbol_type == SymbolData.SymbolType.JACKPOT:
-			bonus_dmg = int(round(35 * bet_mult))
-			bonus_shield = int(round(20 * bet_mult))
-			result.credits_earned += int(round(30 * bet_mult))
+			bonus_dmg = int(round(25 * bet_mult))
+			bonus_shield = int(round(12 * bet_mult))
+			result.credits_earned += int(round(8 * bet_mult))
 		else:
 			bonus_dmg = int(round(8 * bet_mult))
 
@@ -214,7 +214,8 @@ static func _check_edge_triad(indices: Array[int], line_name: String, symbols: A
 		var bonus_shield: int = int(round(15 * bet_mult))
 		result.total_damage += bonus_dmg
 		result.total_shield += bonus_shield
-		result.credits_earned += int(round(15 * bet_mult))
+		# Small 2 Credit bonus for a 3-of-a-kind edge line
+		result.credits_earned += int(round(2 * bet_mult))
 
 		result.lines_triggered.append({
 			"name": line_name + " (TRIPLE MATCH)",
