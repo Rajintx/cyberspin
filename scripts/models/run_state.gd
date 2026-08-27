@@ -3,7 +3,7 @@ extends Node
 signal bankroll_changed(current: int, max_val: int)
 signal shield_changed(current: int)
 signal ram_changed(current: int, max_val: int)
-signal bet_changed(bet_level: int, ante_cost: int, mult: float)
+signal spin_cost_changed(cost: int, turn_num: int)
 signal speed_changed(speed_mult: float)
 signal deck_updated(deck: Array[SymbolData])
 signal relics_updated(relics: Array[RelicData])
@@ -11,27 +11,28 @@ signal relics_updated(relics: Array[RelicData])
 # Singleton reference
 static var instance: Node
 
+enum SpecialistClass {
+	SNIPER,   # 🎯 Laser Sniper (High Crit & Attack)
+	TANK,     # 🛡️ Firewall Tank (Heavy Armor & Reflect)
+	HACKER,   # ☣️ Malware Hacker (DoTs & High RAM)
+	GAMBLER   # 🎰 Crypto High-Roller (Extra Bankroll & Jackpots)
+}
+
+var selected_class: SpecialistClass = SpecialistClass.SNIPER
+
 # Bankroll = Life / Health (When Bankroll hits 0, the player goes bankrupt / Game Over!)
 var credits: int = 100
 var max_bankroll_seen: int = 100
 var player_shield: int = 0
 
-var max_ram: int = 5
-var player_ram: int = 5
+var max_ram: int = 4
+var player_ram: int = 4
 
 var current_floor: int = 1
 var current_node_type: String = "COMBAT"
 
-# Betting Stakes
-# Level 1: 5 Credits Ante, 1.0x Multiplier
-# Level 2: 10 Credits Ante, 2.0x Multiplier
-# Level 3: 20 Credits Ante, 3.5x Multiplier
-var bet_level: int = 1
-const BET_TIERS: Array[Dictionary] = [
-	{"cost": 5, "mult": 1.0, "name": "STANDARD"},
-	{"cost": 10, "mult": 2.0, "name": "OVERDRIVE 2X"},
-	{"cost": 20, "mult": 3.5, "name": "HYPER 3.5X"}
-]
+# Battle Turn & Escalating Ante (Bandwidth Leak)
+var battle_turn_number: int = 1
 
 # Game Speed Multiplier (1.0x, 1.5x, 2.5x)
 var game_speed: float = 1.0
@@ -49,7 +50,7 @@ var all_symbol_library: Array[SymbolData] = []
 var all_relic_library: Array[RelicData] = []
 var all_enemy_library: Array[EnemyData] = []
 
-# Legacy compatibility properties for HP
+# Legacy compatibility properties
 var player_hp: int:
 	get: return credits
 	set(val): credits = val
@@ -61,7 +62,7 @@ var player_max_hp: int:
 func _ready() -> void:
 	instance = self
 	_build_master_libraries()
-	init_new_run()
+	init_new_run(SpecialistClass.SNIPER)
 
 func _build_master_libraries() -> void:
 	all_symbol_library.clear()
@@ -73,12 +74,12 @@ func _build_master_libraries() -> void:
 	laser.id = "laser"
 	laser.display_name = "Plasma Laser"
 	laser.symbol_type = SymbolData.SymbolType.ATTACK
-	laser.base_chips = 7
-	laser.mult_add = 1.0
+	laser.base_chips = 4
+	laser.mult_add = 0.3
 	laser.icon_glyph = "⚡"
 	laser.icon_color = Color(0.0, 0.95, 1.0)
 	laser.glow_color = Color(0.0, 0.7, 1.0, 0.4)
-	laser.description = "Deals 7 Base Chips (+1 Mult) Cyber Damage to Core."
+	laser.description = "Deals 4 Base Chips (+0.3 Mult) Cyber Damage."
 	all_symbol_library.append(laser)
 
 	# 2. Hyper Railgun (High Attack)
@@ -86,27 +87,27 @@ func _build_master_libraries() -> void:
 	railgun.id = "railgun"
 	railgun.display_name = "Hyper Railgun"
 	railgun.symbol_type = SymbolData.SymbolType.ATTACK
-	railgun.base_chips = 18
-	railgun.mult_add = 2.0
+	railgun.base_chips = 9
+	railgun.mult_add = 0.6
 	railgun.rarity = SymbolData.Rarity.UNCOMMON
 	railgun.icon_glyph = "💥"
 	railgun.icon_color = Color(1.0, 0.3, 0.1)
 	railgun.glow_color = Color(1.0, 0.4, 0.0, 0.5)
-	railgun.description = "Heavy artillery dealing 18 Base Chips (+2 Mult) Piercing Damage."
+	railgun.description = "Heavy artillery dealing 9 Base Chips (+0.6 Mult) Piercing Damage."
 	all_symbol_library.append(railgun)
 
-	# 3. Arc Blade (High Mult Attack)
+	# 3. Arc Monoblade (High Mult Attack)
 	var blade := SymbolData.new()
 	blade.id = "arc_blade"
 	blade.display_name = "Arc Monoblade"
 	blade.symbol_type = SymbolData.SymbolType.ATTACK
-	blade.base_chips = 10
-	blade.mult_add = 3.0
+	blade.base_chips = 6
+	blade.mult_add = 1.0
 	blade.rarity = SymbolData.Rarity.UNCOMMON
 	blade.icon_glyph = "🗡️"
 	blade.icon_color = Color(0.9, 0.2, 0.9)
 	blade.glow_color = Color(0.8, 0.1, 0.8, 0.5)
-	blade.description = "High-critical blade delivering 10 Chips (+3 Mult)."
+	blade.description = "High-critical blade delivering 6 Chips (+1.0 Mult)."
 	all_symbol_library.append(blade)
 
 	# 4. Nano Firewall (Shield)
@@ -114,11 +115,11 @@ func _build_master_libraries() -> void:
 	shield.id = "firewall"
 	shield.display_name = "Nano Firewall"
 	shield.symbol_type = SymbolData.SymbolType.SHIELD
-	shield.base_chips = 8
+	shield.base_chips = 5
 	shield.icon_glyph = "🛡️"
 	shield.icon_color = Color(0.1, 0.7, 1.0)
 	shield.glow_color = Color(0.1, 0.5, 0.9, 0.4)
-	shield.description = "Deploys +8 Firewall Shield to protect Bankroll."
+	shield.description = "Deploys +5 Firewall Shield to protect Bankroll."
 	all_symbol_library.append(shield)
 
 	# 5. Aegis Matrix (Heavy Shield)
@@ -126,12 +127,12 @@ func _build_master_libraries() -> void:
 	fortress.id = "fortress"
 	fortress.display_name = "Aegis Matrix"
 	fortress.symbol_type = SymbolData.SymbolType.SHIELD
-	fortress.base_chips = 18
+	fortress.base_chips = 11
 	fortress.rarity = SymbolData.Rarity.UNCOMMON
 	fortress.icon_glyph = "💠"
 	fortress.icon_color = Color(0.3, 0.9, 1.0)
 	fortress.glow_color = Color(0.2, 0.8, 1.0, 0.5)
-	fortress.description = "Deploys +18 Heavy Firewall Shield."
+	fortress.description = "Deploys +11 Heavy Firewall Shield."
 	all_symbol_library.append(fortress)
 
 	# 6. RAM Capacitor (Resource)
@@ -139,11 +140,11 @@ func _build_master_libraries() -> void:
 	ram.id = "ram_bit"
 	ram.display_name = "RAM Capacitor"
 	ram.symbol_type = SymbolData.SymbolType.RAM
-	ram.base_chips = 2
+	ram.base_chips = 1
 	ram.icon_glyph = "💾"
 	ram.icon_color = Color(0.2, 1.0, 0.4)
 	ram.glow_color = Color(0.2, 0.9, 0.3, 0.4)
-	ram.description = "Restores +2 RAM used for Locking reels and Hack abilities."
+	ram.description = "Restores +1 RAM used for Locking reels and Cleanse/Hack abilities."
 	all_symbol_library.append(ram)
 
 	# 7. Overclock Cell (Adjacency Synergizer)
@@ -151,12 +152,12 @@ func _build_master_libraries() -> void:
 	battery.id = "battery"
 	battery.display_name = "Overclock Cell"
 	battery.symbol_type = SymbolData.SymbolType.BATTERY
-	battery.base_chips = 2
+	battery.base_chips = 1
 	battery.rarity = SymbolData.Rarity.UNCOMMON
 	battery.icon_glyph = "🔋"
 	battery.icon_color = Color(1.0, 0.8, 0.0)
 	battery.glow_color = Color(1.0, 0.7, 0.0, 0.5)
-	battery.description = "SYNERGY: Overcharges adjacent perimeter symbols by +100% Value!"
+	battery.description = "SYNERGY: Overcharges adjacent perimeter symbols by +50% Value!"
 	all_symbol_library.append(battery)
 
 	# 8. Thermal Igniter (Burn DoT)
@@ -164,11 +165,11 @@ func _build_master_libraries() -> void:
 	burn.id = "igniter"
 	burn.display_name = "Thermal Igniter"
 	burn.symbol_type = SymbolData.SymbolType.OVERHEAT
-	burn.base_chips = 5
+	burn.base_chips = 3
 	burn.icon_glyph = "🔥"
 	burn.icon_color = Color(1.0, 0.45, 0.0)
 	burn.glow_color = Color(1.0, 0.3, 0.0, 0.5)
-	burn.description = "Applies 5 Overheat (Burn). Deals ticking damage at the start of each Boss turn."
+	burn.description = "Applies 3 Overheat (Burn). Deals ticking damage at the start of each Boss turn."
 	all_symbol_library.append(burn)
 
 	# 9. Data Worm (Virus Bleed)
@@ -176,11 +177,11 @@ func _build_master_libraries() -> void:
 	virus.id = "virus_worm"
 	virus.display_name = "Data Worm"
 	virus.symbol_type = SymbolData.SymbolType.VIRUS
-	virus.base_chips = 4
+	virus.base_chips = 3
 	virus.icon_glyph = "☣️"
 	virus.icon_color = Color(0.8, 0.1, 1.0)
 	virus.glow_color = Color(0.7, 0.0, 0.9, 0.5)
-	virus.description = "Infects Boss with 4 Virus. Deals direct Bleed damage on EVERY lever spin!"
+	virus.description = "Infects Boss with 3 Virus. Deals direct Bleed damage on EVERY lever spin!"
 	all_symbol_library.append(virus)
 
 	# 10. EMP Disruptor (Stun / Vulnerability Primer)
@@ -188,12 +189,12 @@ func _build_master_libraries() -> void:
 	emp.id = "emp_disruptor"
 	emp.display_name = "EMP Disruptor"
 	emp.symbol_type = SymbolData.SymbolType.EMP
-	emp.base_chips = 4
+	emp.base_chips = 2
 	emp.rarity = SymbolData.Rarity.UNCOMMON
 	emp.icon_glyph = "🌀"
 	emp.icon_color = Color(0.1, 0.6, 1.0)
 	emp.glow_color = Color(0.0, 0.5, 1.0, 0.5)
-	emp.description = "Disrupts Boss subroutines with 4 EMP stacks and boosts Piercing strikes."
+	emp.description = "Disrupts Boss subroutines with 2 EMP stacks and boosts Piercing strikes."
 	all_symbol_library.append(emp)
 
 	# 11. Glitch Exploit (Vulnerable)
@@ -201,12 +202,12 @@ func _build_master_libraries() -> void:
 	glitch.id = "glitch_pod"
 	glitch.display_name = "Glitch Exploit"
 	glitch.symbol_type = SymbolData.SymbolType.GLITCH
-	glitch.base_chips = 3
+	glitch.base_chips = 2
 	glitch.rarity = SymbolData.Rarity.UNCOMMON
 	glitch.icon_glyph = "👾"
 	glitch.icon_color = Color(1.0, 0.0, 0.6)
 	glitch.glow_color = Color(1.0, 0.0, 0.5, 0.5)
-	glitch.description = "Applies 3 Glitch stacks. Increases all inward damage dealt to Boss by +50%."
+	glitch.description = "Applies 2 Glitch stacks. Increases all inward damage dealt to Boss by +50%."
 	all_symbol_library.append(glitch)
 
 	# 12. Cyber Jackpot 777 (Jackpot)
@@ -214,13 +215,13 @@ func _build_master_libraries() -> void:
 	jackpot.id = "jackpot_7"
 	jackpot.display_name = "Neon Jackpot 7"
 	jackpot.symbol_type = SymbolData.SymbolType.JACKPOT
-	jackpot.base_chips = 30
-	jackpot.mult_add = 5.0
+	jackpot.base_chips = 16
+	jackpot.mult_add = 1.5
 	jackpot.rarity = SymbolData.Rarity.RARE
 	jackpot.icon_glyph = "7️⃣"
 	jackpot.icon_color = Color(1.0, 0.85, 0.1)
 	jackpot.glow_color = Color(1.0, 0.8, 0.0, 0.7)
-	jackpot.description = "JACKPOT CHIP: Grants 30 Chips, +5 Mult, and pays +25 Credits directly!"
+	jackpot.description = "JACKPOT CHIP: Grants 16 Chips, +1.5 Mult, and pays +15 Credits directly!"
 	all_symbol_library.append(jackpot)
 
 	# 13. Quantum Mirror (Replication)
@@ -228,7 +229,7 @@ func _build_master_libraries() -> void:
 	mirror.id = "mirror_chip"
 	mirror.display_name = "Quantum Mirror"
 	mirror.symbol_type = SymbolData.SymbolType.MIRROR
-	mirror.base_chips = 5
+	mirror.base_chips = 3
 	mirror.rarity = SymbolData.Rarity.RARE
 	mirror.icon_glyph = "🪞"
 	mirror.icon_color = Color(0.7, 0.9, 1.0)
@@ -241,12 +242,12 @@ func _build_master_libraries() -> void:
 	miner.id = "crypto_miner"
 	miner.display_name = "Crypto Miner"
 	miner.symbol_type = SymbolData.SymbolType.MINER
-	miner.base_chips = 8
+	miner.base_chips = 4
 	miner.rarity = SymbolData.Rarity.UNCOMMON
 	miner.icon_glyph = "⛏️"
 	miner.icon_color = Color(0.2, 0.9, 0.6)
 	miner.glow_color = Color(0.1, 0.8, 0.5, 0.5)
-	miner.description = "Mines +8 Credits dividend directly to your Bankroll on every spin!"
+	miner.description = "Mines +4 Credits dividend directly to your Bankroll on every spin!"
 	all_symbol_library.append(miner)
 
 	# Relic Library
@@ -256,8 +257,8 @@ func _build_master_libraries() -> void:
 	r1.relic_type = RelicData.RelicType.NANO_REGEN
 	r1.icon_glyph = "🧬"
 	r1.icon_color = Color(0.2, 1.0, 0.6)
-	r1.cost = 45
-	r1.description = "Installs nano-firewalls to grant +6 Shield automatically on every lever spin."
+	r1.cost = 35
+	r1.description = "Installs nano-firewalls to grant +4 Shield automatically on every lever spin."
 	all_relic_library.append(r1)
 
 	var r2 := RelicData.new()
@@ -266,8 +267,8 @@ func _build_master_libraries() -> void:
 	r2.relic_type = RelicData.RelicType.OVERCLOCK_MODULE
 	r2.icon_glyph = "⚡"
 	r2.icon_color = Color(1.0, 0.8, 0.0)
-	r2.cost = 60
-	r2.description = "Battery cells now provide +150% adjacency multiplier instead of +100%."
+	r2.cost = 45
+	r2.description = "Battery cells now provide +75% adjacency multiplier instead of +50%."
 	all_relic_library.append(r2)
 
 	var r3 := RelicData.new()
@@ -276,8 +277,8 @@ func _build_master_libraries() -> void:
 	r3.relic_type = RelicData.RelicType.VIRAL_PAYLOAD
 	r3.icon_glyph = "☣️"
 	r3.icon_color = Color(0.8, 0.2, 1.0)
-	r3.cost = 55
-	r3.description = "Data Virus deals +5 bonus Cyber Damage whenever triggered and infects neighbors."
+	r3.cost = 40
+	r3.description = "Data Virus deals +2 bonus Cyber Damage whenever triggered and infects neighbors."
 	all_relic_library.append(r3)
 
 	var r4 := RelicData.new()
@@ -286,8 +287,8 @@ func _build_master_libraries() -> void:
 	r4.relic_type = RelicData.RelicType.RELOAD_CAPACITOR
 	r4.icon_glyph = "💾"
 	r4.icon_color = Color(0.2, 0.8, 1.0)
-	r4.cost = 50
-	r4.description = "Increases Max RAM by +2 and starts every combat fully loaded."
+	r4.cost = 40
+	r4.description = "Increases Max RAM by +1 and starts every combat fully loaded."
 	all_relic_library.append(r4)
 
 	var r5 := RelicData.new()
@@ -296,8 +297,8 @@ func _build_master_libraries() -> void:
 	r5.relic_type = RelicData.RelicType.CRYPTO_STAKE
 	r5.icon_glyph = "📈"
 	r5.icon_color = Color(0.2, 1.0, 0.5)
-	r5.cost = 70
-	r5.description = "Every 40 Credits in your Bankroll adds +1 Base Multiplier to all attack lines!"
+	r5.cost = 50
+	r5.description = "Every 30 Credits in your Bankroll adds +0.3 Base Multiplier to all attack lines!"
 	all_relic_library.append(r5)
 
 	var r6 := RelicData.new()
@@ -306,114 +307,204 @@ func _build_master_libraries() -> void:
 	r6.relic_type = RelicData.RelicType.PLASMA_CONVERTER
 	r6.icon_glyph = "🛡️"
 	r6.icon_color = Color(0.0, 0.9, 1.0)
-	r6.cost = 65
-	r6.description = "Excess Firewall Shield is converted into direct counter-attack laser damage!"
+	r6.cost = 45
+	r6.description = "30% of absorbed Firewall Shield is converted into direct counter-attack laser damage!"
 	all_relic_library.append(r6)
 
-	_build_enemies()
+	_build_10_floor_enemies()
 
-func _build_enemies() -> void:
-	# Floor 1: Sector Patrol Drone
-	var drone := EnemyData.new()
-	drone.id = "sec_drone"
-	drone.display_name = "V-9 Patrol Drone"
-	drone.max_hp = 65
-	drone.starting_shield = 12
-	drone.avatar_glyph = "🤖"
-	drone.theme_color = Color(0.0, 0.85, 1.0)
-	drone.credits_reward = 35
-	drone.flavor_quote = "SCANNING SECTOR... PIRATE TERMINAL ISOLATED."
-	drone.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 1, "name": "Spike Emitter", "desc": "Plants a 📌 Data Spike on 1 orbital slot (10 DMG on landing)."},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 14, "name": "Deflection Matrix", "desc": "Deploys +14 Shield."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 1, "name": "Malware Injector", "desc": "Plants a ☣️ Poison trap on 1 slot (drains 6 Credits/turn)."},
-		{"type": EnemyData.IntentType.ATTACK, "value": 10, "name": "Pulse Blaster", "desc": "Fires a 10 DMG Cyber Laser."}
+func _build_10_floor_enemies() -> void:
+	all_enemy_library.clear()
+
+	# Floor 1: Sector Patrol Drone (50 HP)
+	var f1 := EnemyData.new()
+	f1.id = "sec_drone"
+	f1.display_name = "V-9 Patrol Drone"
+	f1.max_hp = 50
+	f1.starting_shield = 10
+	f1.avatar_glyph = "🤖"
+	f1.theme_color = Color(0.0, 0.85, 1.0)
+	f1.credits_reward = 30
+	f1.flavor_quote = "SCANNING SECTOR... PIRATE TERMINAL ISOLATED."
+	f1.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 1, "name": "Spike Emitter", "desc": "Plants 1 📌 Data Spike (6 DMG on landing)."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 10, "name": "Deflection Matrix", "desc": "Deploys +10 Shield."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 1, "name": "Malware Injector", "desc": "Plants 1 ☣️ Poison trap (drains 3 Credits/turn)."},
+		{"type": EnemyData.IntentType.ATTACK, "value": 7, "name": "Pulse Blaster", "desc": "Fires a 7 DMG Cyber Laser."}
 	]
-	all_enemy_library.append(drone)
+	all_enemy_library.append(f1)
 
-	# Floor 2: Corp Enforcer & Cyber-Hound
-	var enforcer := EnemyData.new()
-	enforcer.id = "corp_enforcer"
-	enforcer.display_name = "Sector Enforcer Mech"
-	enforcer.max_hp = 110
-	enforcer.starting_shield = 24
-	enforcer.avatar_glyph = "🦿"
-	enforcer.theme_color = Color(0.2, 0.6, 1.0)
-	enforcer.credits_reward = 50
-	enforcer.flavor_quote = "SURRENDER TERMINAL ASSETS TO CORPORATE POLICE."
-	enforcer.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Minefield", "desc": "Plants 📌 Data Spikes on 2 orbital slots!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 3, "name": "Burst Fire", "desc": "Fires 3 rapid lasers (3x 5 = 15 DMG)."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Toxic Gas Vent", "desc": "Infects 2 orbital slots with ☣️ Poison!"},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 20, "name": "Heavy Plating", "desc": "Deploys +20 Armor."}
+	# Floor 2: Security Enforcer Mech (75 HP)
+	var f2 := EnemyData.new()
+	f2.id = "corp_enforcer"
+	f2.display_name = "Sector Enforcer Mech"
+	f2.max_hp = 75
+	f2.starting_shield = 15
+	f2.avatar_glyph = "🦿"
+	f2.theme_color = Color(0.2, 0.6, 1.0)
+	f2.credits_reward = 45
+	f2.flavor_quote = "SURRENDER TERMINAL ASSETS TO CORPORATE POLICE."
+	f2.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 1, "name": "Spike Minefield", "desc": "Plants 1 📌 Data Spike (6 DMG)."},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 3, "hits": 3, "name": "Burst Fire", "desc": "Fires 3 rapid lasers (3x 3 = 9 DMG)."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 1, "name": "Toxic Gas Vent", "desc": "Infects 1 slot with ☣️ Poison (4 CR/turn)."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 14, "name": "Heavy Plating", "desc": "Deploys +14 Armor."}
 	]
-	all_enemy_library.append(enforcer)
+	all_enemy_library.append(f2)
 
-	# Floor 3: Elite AI Subroutine Viper
-	var viper := EnemyData.new()
-	viper.id = "cyber_viper"
-	viper.display_name = "Sub-Routine Viper AI"
-	viper.max_hp = 175
-	viper.starting_shield = 35
-	viper.avatar_glyph = "🐍"
-	viper.theme_color = Color(0.9, 0.1, 0.4)
-	viper.is_elite = true
-	viper.credits_reward = 80
-	viper.flavor_quote = "HOSTILE INTEL DETECTED. PURGE PROTOCOL ACTIVE."
-	viper.intent_sequence = [
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Neuro-Venom", "desc": "Infects 2 slots with ☣️ Poison and inflicts Overheat."},
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Net", "desc": "Plants 📌 Spikes on 2 slots!"},
-		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 12, "name": "Synapse Detonator", "desc": "💥 Detonates all active tile hazards on board for double damage!"},
-		{"type": EnemyData.IntentType.SHIELD_UP, "value": 28, "name": "Hardened Shell", "desc": "Deploys +28 Nano-Shield."}
+	# Floor 3: Cyber-Viper AI (110 HP)
+	var f3 := EnemyData.new()
+	f3.id = "cyber_viper"
+	f3.display_name = "Sub-Routine Cyber-Viper"
+	f3.max_hp = 110
+	f3.starting_shield = 20
+	f3.avatar_glyph = "🐍"
+	f3.theme_color = Color(0.9, 0.1, 0.4)
+	f3.is_elite = true
+	f3.credits_reward = 65
+	f3.flavor_quote = "HOSTILE INTEL DETECTED. PURGE PROTOCOL ACTIVE."
+	f3.intent_sequence = [
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Neuro-Venom", "desc": "Infects 2 slots with ☣️ Poison and Overheat."},
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Net", "desc": "Plants 2 📌 Spikes (7 DMG)!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 4, "hits": 3, "name": "Venom Flurry", "desc": "3 rapid strikes (3x 4 = 12 DMG)."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 18, "name": "Hardened Shell", "desc": "Deploys +18 Nano-Shield."}
 	]
-	all_enemy_library.append(viper)
+	all_enemy_library.append(f3)
 
-	# Floor 4: Cyber-Leviathan Heavy Drone
-	var leviathan := EnemyData.new()
-	leviathan.id = "leviathan"
-	leviathan.display_name = "Aegis-Class Dreadnought"
-	leviathan.max_hp = 260
-	leviathan.starting_shield = 50
-	leviathan.avatar_glyph = "🛸"
-	leviathan.theme_color = Color(1.0, 0.4, 0.0)
-	leviathan.is_elite = true
-	leviathan.credits_reward = 110
-	leviathan.flavor_quote = "COMMENCING TOTAL SECTOR AIRSPACE LOCKDOWN."
-	leviathan.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Orbital Spike Launcher", "desc": "Plants 📌 Spikes across 3 orbital slots!"},
-		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 7, "hits": 4, "name": "Gatling Lasers", "desc": "4 heavy laser blasts (4x 7 = 28 DMG)."},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Bio-Plague Corruptor", "desc": "Infects 2 slots with ☣️ Poison!"},
-		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 18, "name": "Particle Shockwave", "desc": "💥 Deals 18 DMG and triggers all board hazards!"}
+	# Floor 4: Heavy Assault Bot (160 HP)
+	var f4 := EnemyData.new()
+	f4.id = "assault_bot"
+	f4.display_name = "Assault Tank Sentinel"
+	f4.max_hp = 160
+	f4.starting_shield = 30
+	f4.avatar_glyph = "🛡️"
+	f4.theme_color = Color(1.0, 0.45, 0.0)
+	f4.credits_reward = 90
+	f4.flavor_quote = "DEFENSIVE PERIMETER COMPROMISED. REINFORCING ARMOR."
+	f4.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Spike Mine", "desc": "Plants 2 📌 Spikes (8 DMG)!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 8, "name": "Shockwave", "desc": "💥 Deals 8 DMG and triggers board hazards!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Malware Mist", "desc": "Infects 2 slots with ☣️ Poison (5 CR/turn)."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 24, "name": "Fortress Shield", "desc": "Deploys +24 Shield."}
 	]
-	all_enemy_library.append(leviathan)
+	all_enemy_library.append(f4)
 
-	# Floor 5: Megacorp Nexus Core (Final Boss)
-	var mainframe := EnemyData.new()
-	mainframe.id = "corp_mainframe"
-	mainframe.display_name = "MEGACORP NEXUS CORE"
-	mainframe.max_hp = 380
-	mainframe.starting_shield = 65
-	mainframe.avatar_glyph = "👁️"
-	mainframe.theme_color = Color(1.0, 0.05, 0.3)
-	mainframe.is_boss = true
-	mainframe.credits_reward = 250
-	mainframe.flavor_quote = "I AM THE FOUNDATION OF REALITY. YOU CANNOT BREACH THIS NEXUS."
-	mainframe.intent_sequence = [
-		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Quantum Spike Matrix", "desc": "Arms 3 slots with 📌 Data Spikes!"},
-		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Apex Malware Infestation", "desc": "Infects 3 slots with ☣️ Poison!"},
-		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 25, "name": "SYSTEM_DETONATE()", "desc": "💥 Deals 25 DMG and detonates all board hazards!"},
-		{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 45, "name": "EXECUTE_PURGE()", "desc": "Ultimate Overclock Strike dealing 45 DMG!"}
+	# Floor 5: ACT 1 APEX MID-BOSS: Overlord Prime (240 HP)
+	var f5 := EnemyData.new()
+	f5.id = "overlord_prime"
+	f5.display_name = "OVERLORD PRIME // ACT 1 APEX"
+	f5.max_hp = 240
+	f5.starting_shield = 45
+	f5.avatar_glyph = "👁️"
+	f5.theme_color = Color(1.0, 0.05, 0.3)
+	f5.is_boss = true
+	f5.credits_reward = 150
+	f5.flavor_quote = "YOU HAVE ENTERED THE CORE ARCHITECTURE. PREPARE FOR DELETION."
+	f5.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Apex Spike Matrix", "desc": "Plants 2 📌 Spikes (8 DMG)!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 3, "name": "Triad Lasers", "desc": "Fires 3 beams (3x 5 = 15 DMG)."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Core Malware", "desc": "Infects 2 slots with ☣️ Poison."},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 14, "name": "SYSTEM_DETONATE()", "desc": "💥 Deals 14 DMG and detonates all hazards!"}
 	]
-	all_enemy_library.append(mainframe)
+	all_enemy_library.append(f5)
 
-func init_new_run() -> void:
-	credits = 100
-	max_bankroll_seen = 100
-	player_shield = 0
-	max_ram = 5
-	player_ram = max_ram
+	# Floor 6: Quantum Sentinel (350 HP)
+	var f6 := EnemyData.new()
+	f6.id = "quantum_sentinel"
+	f6.display_name = "Quantum Phase Sentinel"
+	f6.max_hp = 350
+	f6.starting_shield = 60
+	f6.avatar_glyph = "💠"
+	f6.theme_color = Color(0.3, 0.9, 1.0)
+	f6.credits_reward = 190
+	f6.flavor_quote = "TEMPORAL FREQUENCY SHIFTED. COMMENCING RETALIATION."
+	f6.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Phase Spikes", "desc": "Plants 2 📌 Spikes (9 DMG)."},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 32, "name": "Quantum Barrier", "desc": "Deploys +32 Barrier Shield."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Phase Poison", "desc": "Infects 2 slots with ☣️ Poison (6 CR/turn)."},
+		{"type": EnemyData.IntentType.ATTACK, "value": 16, "name": "Disruptor Lance", "desc": "Deals 16 Cyber Damage."}
+	]
+	all_enemy_library.append(f6)
+
+	# Floor 7: Nano-Swarm Hivemind (500 HP)
+	var f7 := EnemyData.new()
+	f7.id = "nano_swarm"
+	f7.display_name = "Nano-Swarm Hivemind AI"
+	f7.max_hp = 500
+	f7.starting_shield = 80
+	f7.avatar_glyph = "🐝"
+	f7.theme_color = Color(0.8, 0.2, 1.0)
+	f7.is_elite = true
+	f7.credits_reward = 240
+	f7.flavor_quote = "WE ARE MILLIONS. YOUR TERMINAL WILL BE CONSUMED."
+	f7.intent_sequence = [
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 4, "hits": 4, "name": "Swarm Barrage", "desc": "4 rapid hits (4x 4 = 16 DMG)."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Nanite Infection", "desc": "Infects 2 slots with ☣️ Poison."},
+		{"type": EnemyData.IntentType.CORRUPT_REEL, "value": 2, "name": "Swarm Glitch", "desc": "Glitch locks 2 orbital reels!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 40, "name": "Nanite Armor", "desc": "Deploys +40 Shield."}
+	]
+	all_enemy_library.append(f7)
+
+	# Floor 8: Aegis Leviathan Carrier (720 HP)
+	var f8 := EnemyData.new()
+	f8.id = "aegis_leviathan"
+	f8.display_name = "Aegis Leviathan Dreadnought"
+	f8.max_hp = 720
+	f8.starting_shield = 110
+	f8.avatar_glyph = "🛸"
+	f8.theme_color = Color(1.0, 0.4, 0.0)
+	f8.is_elite = true
+	f8.credits_reward = 320
+	f8.flavor_quote = "ALL AIRSPACE RESTRICTED. LETHAL FORCE AUTHORIZED."
+	f8.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Orbital Spikes", "desc": "Plants 3 📌 Spikes (10 DMG)!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 5, "hits": 4, "name": "Gatling Lasers", "desc": "4 heavy laser blasts (4x 5 = 20 DMG)."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Bio-Plague", "desc": "Infects 3 slots with ☣️ Poison (6 CR/turn)."},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 18, "name": "Particle Shockwave", "desc": "💥 Deals 18 DMG and triggers all hazards!"}
+	]
+	all_enemy_library.append(f8)
+
+	# Floor 9: Corporate Citadel Core (1,050 HP)
+	var f9 := EnemyData.new()
+	f9.id = "citadel_core"
+	f9.display_name = "Citadel Command AI"
+	f9.max_hp = 1050
+	f9.starting_shield = 160
+	f9.avatar_glyph = "🏰"
+	f9.theme_color = Color(1.0, 0.15, 0.4)
+	f9.is_elite = true
+	f9.credits_reward = 420
+	f9.flavor_quote = "YOU HAVE BREACHED 9 LAYERS OF SECURITY. THIS IS YOUR FINAL WARNING."
+	f9.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 3, "name": "Citadel Spikes", "desc": "Arms 3 slots with 📌 Spikes (10 DMG)!"},
+		{"type": EnemyData.IntentType.SHIELD_UP, "value": 55, "name": "Command Barrier", "desc": "Deploys +55 Heavy Shield."},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "Apex Malware", "desc": "Infects 3 slots with ☣️ Poison!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 22, "name": "CITADEL_OVERLOAD()", "desc": "💥 Deals 22 DMG and detonates all hazards!"}
+	]
+	all_enemy_library.append(f9)
+
+	# Floor 10: FINAL OMEGA NEXUS CORE (1,500 HP)
+	var f10 := EnemyData.new()
+	f10.id = "omega_nexus"
+	f10.display_name = "FINAL OMEGA NEXUS CORE"
+	f10.max_hp = 1500
+	f10.starting_shield = 220
+	f10.avatar_glyph = "👁️"
+	f10.theme_color = Color(1.0, 0.05, 0.3)
+	f10.is_boss = true
+	f10.credits_reward = 750
+	f10.flavor_quote = "I AM THE GOD-MACHINE. REALITY COLLAPSES UPON COMMAND."
+	f10.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 4, "name": "Omni-Spike Grid", "desc": "Arms 4 slots with 📌 Data Spikes (12 DMG)!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 3, "name": "God-Malware Overwrite", "desc": "Infects 3 slots with ☣️ Poison!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 25, "name": "APOCALYPSE_DETONATE()", "desc": "💥 Deals 25 DMG and detonates all board hazards!"},
+		{"type": EnemyData.IntentType.HEAVY_ATTACK, "value": 35, "name": "EXECUTE_PURGE()", "desc": "Ultimate Overclock Strike dealing 35 DMG!"}
+	]
+	all_enemy_library.append(f10)
+
+func init_new_run(specialist: SpecialistClass = SpecialistClass.SNIPER) -> void:
+	selected_class = specialist
 	current_floor = 1
-	bet_level = 1
 	game_speed = 1.0
 	total_spins = 0
 	total_jackpots = 0
@@ -422,18 +513,58 @@ func init_new_run() -> void:
 	relics.clear()
 	symbol_deck.clear()
 
-	# Populate starter deck (16 well-balanced cyber symbols)
-	_add_starter_symbols("laser", 4)
-	_add_starter_symbols("firewall", 4)
-	_add_starter_symbols("ram_bit", 3)
-	_add_starter_symbols("battery", 2)
-	_add_starter_symbols("igniter", 2)
-	_add_starter_symbols("crypto_miner", 1)
+	# Configure starter loadout based on chosen specialist
+	match specialist:
+		SpecialistClass.SNIPER:
+			credits = 100
+			max_bankroll_seen = 100
+			max_ram = 4
+			player_ram = max_ram
+			_add_starter_symbols("laser", 4)
+			_add_starter_symbols("arc_blade", 3)
+			_add_starter_symbols("firewall", 3)
+			_add_starter_symbols("ram_bit", 2)
+			_add_starter_symbols("battery", 2)
+		SpecialistClass.TANK:
+			credits = 100
+			max_bankroll_seen = 100
+			max_ram = 4
+			player_ram = max_ram
+			_add_starter_symbols("firewall", 4)
+			_add_starter_symbols("fortress", 3)
+			_add_starter_symbols("laser", 3)
+			_add_starter_symbols("ram_bit", 2)
+			_add_starter_symbols("battery", 2)
+			add_relic(get_relic_by_id("plasma_converter"))
+		SpecialistClass.HACKER:
+			credits = 90
+			max_bankroll_seen = 90
+			max_ram = 5
+			player_ram = max_ram
+			_add_starter_symbols("virus_worm", 4)
+			_add_starter_symbols("igniter", 3)
+			_add_starter_symbols("emp_disruptor", 3)
+			_add_starter_symbols("firewall", 2)
+			_add_starter_symbols("ram_bit", 2)
+			add_relic(get_relic_by_id("viral_payload"))
+		SpecialistClass.GAMBLER:
+			credits = 150
+			max_bankroll_seen = 150
+			max_ram = 4
+			player_ram = max_ram
+			_add_starter_symbols("crypto_miner", 3)
+			_add_starter_symbols("jackpot_7", 3)
+			_add_starter_symbols("laser", 3)
+			_add_starter_symbols("firewall", 3)
+			_add_starter_symbols("ram_bit", 2)
+
+	player_shield = 0
+	battle_turn_number = 1
 
 	bankroll_changed.emit(credits, max_bankroll_seen)
 	shield_changed.emit(player_shield)
 	ram_changed.emit(player_ram, max_ram)
-	bet_changed.emit(bet_level, get_current_ante(), get_current_mult())
+	spin_cost_changed.emit(get_current_spin_cost(), battle_turn_number)
 	speed_changed.emit(game_speed)
 	deck_updated.emit(symbol_deck)
 	relics_updated.emit(relics)
@@ -450,6 +581,12 @@ func get_symbol_by_id(id: String) -> SymbolData:
 			return s
 	return null
 
+func get_relic_by_id(id: String) -> RelicData:
+	for r in all_relic_library:
+		if r.id == id:
+			return r
+	return null
+
 func get_random_draft_symbols(count: int = 3) -> Array[SymbolData]:
 	var result: Array[SymbolData] = []
 	var pool := all_symbol_library.duplicate()
@@ -458,7 +595,7 @@ func get_random_draft_symbols(count: int = 3) -> Array[SymbolData]:
 		result.append(pool[i].duplicate())
 	return result
 
-func get_random_relics(count: int = 3) -> Array[RelicData]:
+func get_random_relics(count: int = 2) -> Array[RelicData]:
 	var result: Array[RelicData] = []
 	var pool := all_relic_library.duplicate()
 	pool.shuffle()
@@ -466,18 +603,89 @@ func get_random_relics(count: int = 3) -> Array[RelicData]:
 		result.append(pool[i].duplicate())
 	return result
 
-func get_enemy_for_node(node_type: String) -> EnemyData:
-	match node_type:
-		"BOSS":
-			return all_enemy_library[4].duplicate() # Megacorp Mainframe (Floor 5)
-		"ELITE":
-			if current_floor >= 4:
-				return all_enemy_library[3].duplicate() # Leviathan
-			return all_enemy_library[2].duplicate() # Viper
-		_:
-			if current_floor >= 2:
-				return all_enemy_library[1].duplicate() # Enforcer
-			return all_enemy_library[0].duplicate() # Drone
+func get_mimic_enemy() -> EnemyData:
+	var mimic := EnemyData.new()
+	mimic.id = "trojan_mimic"
+	mimic.display_name = "TROJAN MIMIC MECH"
+	mimic.max_hp = 140
+	mimic.starting_shield = 25
+	mimic.avatar_glyph = "📦"
+	mimic.theme_color = Color(0.9, 0.2, 1.0)
+	mimic.is_elite = true
+	mimic.credits_reward = 120
+	mimic.flavor_quote = "SURPRISE AMBUSH: CACHE PROTOCOL DECRYPTED AS LETHAL TROJAN."
+	mimic.intent_sequence = [
+		{"type": EnemyData.IntentType.PLANT_SPIKES, "value": 2, "name": "Bite Thorns", "desc": "Plants 2 📌 Spikes on the grid!"},
+		{"type": EnemyData.IntentType.INJECT_POISON, "value": 2, "name": "Trojan Malware", "desc": "Infects 2 slots with ☣️ Poison!"},
+		{"type": EnemyData.IntentType.DETONATE_HAZARDS, "value": 14, "name": "Cache Detonation", "desc": "💥 Deals 14 DMG and detonates all hazards!"},
+		{"type": EnemyData.IntentType.MULTI_ATTACK, "value": 4, "hits": 3, "name": "Chomp Flurry", "desc": "3 rapid bites (3x 4 = 12 DMG)!"}
+	]
+	return mimic
+
+func get_enemy_for_node(node_type: String, floor_num: int = 1) -> EnemyData:
+	if node_type == "MIMIC":
+		var mimic := get_mimic_enemy()
+		mimic.max_hp = int(round(90.0 * pow(1.35, float(floor_num - 1))))
+		return mimic
+	var floor_idx: int = clampi(floor_num - 1, 0, all_enemy_library.size() - 1)
+	return all_enemy_library[floor_idx].duplicate()
+
+const MAX_DECK_SIZE: int = 20
+
+func can_add_symbol() -> bool:
+	return symbol_deck.size() < MAX_DECK_SIZE
+
+func replace_symbol_at(index: int, new_symbol: SymbolData) -> void:
+	if index >= 0 and index < symbol_deck.size():
+		symbol_deck[index] = new_symbol
+		deck_updated.emit(symbol_deck)
+
+# Escalating Spin Cost per Battle (Bandwidth Leak / Ante Inflation)
+func get_current_spin_cost() -> int:
+	var f: int = current_floor
+	var floor_base: int = 2 + (f - 1)
+	var floor_cap: int = 5 + ((f - 1) * 2) + (3 if f >= 5 else 0)
+	var cost: int = clampi(floor_base + (battle_turn_number - 1), floor_base, floor_cap)
+	return cost
+
+func start_new_battle_turn() -> void:
+	battle_turn_number += 1
+	spin_cost_changed.emit(get_current_spin_cost(), battle_turn_number)
+
+func reset_battle_turns() -> void:
+	battle_turn_number = 1
+	spin_cost_changed.emit(get_current_spin_cost(), battle_turn_number)
+
+func spend_spin_bet() -> bool:
+	var cost := get_current_spin_cost()
+	if credits >= cost:
+		credits -= cost
+		bankroll_changed.emit(credits, max_bankroll_seen)
+		return true
+	if credits > 0:
+		credits = 0
+		bankroll_changed.emit(credits, max_bankroll_seen)
+		return true
+	return false
+
+func cycle_bet_level() -> void:
+	# Keep compatibility toggle
+	pass
+
+func get_current_ante() -> int:
+	return get_current_spin_cost()
+
+func get_current_mult() -> float:
+	return 1.0
+
+func cycle_game_speed() -> void:
+	if game_speed == 1.0:
+		game_speed = 1.5
+	elif game_speed == 1.5:
+		game_speed = 2.5
+	else:
+		game_speed = 1.0
+	speed_changed.emit(game_speed)
 
 func add_symbol(s: SymbolData) -> void:
 	symbol_deck.append(s)
@@ -489,9 +697,11 @@ func remove_symbol_at(index: int) -> void:
 		deck_updated.emit(symbol_deck)
 
 func add_relic(r: RelicData) -> void:
+	if r == null:
+		return
 	relics.append(r)
 	if r.relic_type == RelicData.RelicType.RELOAD_CAPACITOR:
-		max_ram += 2
+		max_ram += 1
 		player_ram = max_ram
 		ram_changed.emit(player_ram, max_ram)
 	relics_updated.emit(relics)
@@ -500,38 +710,6 @@ func has_relic(type: RelicData.RelicType) -> bool:
 	for r in relics:
 		if r.relic_type == type:
 			return true
-	return false
-
-func get_current_ante() -> int:
-	return BET_TIERS[bet_level - 1]["cost"]
-
-func get_current_mult() -> float:
-	return BET_TIERS[bet_level - 1]["mult"]
-
-func cycle_bet_level() -> void:
-	bet_level = (bet_level % BET_TIERS.size()) + 1
-	bet_changed.emit(bet_level, get_current_ante(), get_current_mult())
-
-func cycle_game_speed() -> void:
-	if game_speed == 1.0:
-		game_speed = 1.5
-	elif game_speed == 1.5:
-		game_speed = 2.5
-	else:
-		game_speed = 1.0
-	speed_changed.emit(game_speed)
-
-func spend_spin_bet() -> bool:
-	var cost := get_current_ante()
-	if credits >= cost:
-		credits -= cost
-		bankroll_changed.emit(credits, max_bankroll_seen)
-		return true
-	# Low bankroll: allow emergency all-in spin if credits > 0
-	if credits > 0:
-		credits = 0
-		bankroll_changed.emit(credits, max_bankroll_seen)
-		return true
 	return false
 
 func add_credits(amount: int) -> void:
@@ -543,7 +721,6 @@ func add_credits(amount: int) -> void:
 	bankroll_changed.emit(credits, max_bankroll_seen)
 
 func modify_hp(amount: int) -> void:
-	# Modifying HP is modifying Bankroll!
 	if amount > 0:
 		add_credits(amount)
 	elif amount < 0:
@@ -563,9 +740,6 @@ func take_damage_direct(amount: int) -> int:
 	if remaining_dmg > 0:
 		credits = maxi(0, credits - remaining_dmg)
 		bankroll_changed.emit(credits, max_bankroll_seen)
-		if credits <= 0:
-			# Bankruptcy
-			pass
 
 	return remaining_dmg
 

@@ -36,6 +36,7 @@ func _ready() -> void:
 	RunState.bankroll_changed.connect(_on_bankroll_changed)
 	RunState.shield_changed.connect(_on_shield_changed)
 	RunState.ram_changed.connect(_on_ram_changed)
+	RunState.spin_cost_changed.connect(_on_spin_cost_changed)
 	RunState.relics_updated.connect(_on_relics_updated)
 
 	_update_all_hud()
@@ -44,8 +45,9 @@ func start_combat(enemy: EnemyData) -> void:
 	current_enemy = enemy
 	is_resolving_turn = false
 
-	# Reset player shield for new combat
+	# Reset player shield and battle turns for new combat
 	RunState.set_shield(0)
+	RunState.reset_battle_turns()
 
 	# Restore RAM if reload capacitor relic present
 	if RunState.has_relic(RelicData.RelicType.RELOAD_CAPACITOR):
@@ -57,7 +59,7 @@ func start_combat(enemy: EnemyData) -> void:
 	orbital_slot_machine.populate_initial_grid(RunState.symbol_deck)
 	orbital_slot_machine.set_controls_enabled(true)
 
-	floor_label.text = "FLOOR %d // %s" % [RunState.current_floor, enemy.display_name.to_upper()]
+	floor_label.text = "FLOOR %d/10 // %s" % [RunState.current_floor, enemy.display_name.to_upper()]
 	_log("[color=#00f0ff]=== ENGAGING ENEMY: %s ===[/color]" % enemy.display_name)
 	_log("[color=#8888aa]\"%s\"[/color]" % enemy.flavor_quote)
 	_update_all_hud()
@@ -66,6 +68,7 @@ func _update_all_hud() -> void:
 	_on_bankroll_changed(RunState.credits, RunState.max_bankroll_seen)
 	_on_shield_changed(RunState.player_shield)
 	_on_ram_changed(RunState.player_ram, RunState.max_ram)
+	_on_spin_cost_changed(RunState.get_current_spin_cost(), RunState.battle_turn_number)
 	_on_relics_updated(RunState.relics)
 
 func _on_bankroll_changed(current: int, max_val: int) -> void:
@@ -83,6 +86,9 @@ func _on_shield_changed(current: int) -> void:
 func _on_ram_changed(current: int, max_val: int) -> void:
 	ram_label.text = "💾 RAM: %d / %d" % [current, max_val]
 
+func _on_spin_cost_changed(cost: int, turn_num: int) -> void:
+	orbital_slot_machine.spin_button.text = "⚡ PULL LEVER (Cost: %d💳 | Turn %d) [SPACE] ⚡" % [cost, turn_num]
+
 func _on_relics_updated(relic_list: Array[RelicData]) -> void:
 	for child in relic_container.get_children():
 		child.queue_free()
@@ -99,6 +105,7 @@ func _on_spin_requested() -> void:
 	# Tick Virus damage on spin
 	var virus_dmg := boss_core.tick_spin_virus_status()
 	if virus_dmg > 0:
+		spawn_floating_text("☣️ -%d" % virus_dmg, Color(0.8, 0.2, 1.0), boss_core.global_position + Vector2(40, 20))
 		_log("[color=#cc33ff]☣️ Data Virus triggered! Dealt %d Bleed DMG to Core.[/color]" % virus_dmg)
 
 func _on_spin_completed(eval_result: Dictionary) -> void:
@@ -122,12 +129,15 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 
 	if dmg > 0:
 		boss_core.take_damage(dmg)
+		spawn_floating_text("-%d DMG" % dmg, Color(0.0, 1.0, 0.8), boss_core.global_position + Vector2(40, 20))
+		trigger_screen_shake(4.0)
 		if dmg > RunState.highest_single_spin_dmg:
 			RunState.highest_single_spin_dmg = dmg
 		_log("[color=#00ffcc]⚡ Terminal Fired! Dealt %d Cyber Damage to Core.[/color]" % dmg)
 
 	if shd > 0:
 		RunState.add_shield(shd)
+		spawn_floating_text("+%d 🛡️" % shd, Color(0.2, 0.8, 1.0), player_hp_bar.global_position + Vector2(20, -10))
 		_log("[color=#3399ff]🛡️ Firewall Deployed: +%d Shield gained.[/color]" % shd)
 
 	if ram_gain > 0:
@@ -152,6 +162,7 @@ func _on_spin_completed(eval_result: Dictionary) -> void:
 
 	if creds > 0:
 		RunState.add_credits(creds)
+		spawn_floating_text("+%d 💳" % creds, Color(1.0, 0.85, 0.2), credits_label.global_position + Vector2(20, 20))
 		_log("[color=#ffcc00]💰 Payout Received: +%d Credits to Bankroll![/color]" % creds)
 
 	# 2. Check and Trigger Active Tile Hazards (Spikes & Poison)
@@ -177,11 +188,11 @@ func _resolve_tile_hazards() -> void:
 	for i in range(8):
 		var tile: SlotTile = orbital_slot_machine.slot_tiles[i]
 		if tile.hazard_type == SlotTile.HazardType.SPIKE:
-			total_spike_dmg += 10
+			total_spike_dmg += 6 + int(floor(float(RunState.current_floor) / 2.0))
 			tile.play_hazard_trigger_fx()
 			tile.clear_hazard() # Spike pops after trigger
 		elif tile.hazard_type == SlotTile.HazardType.POISON:
-			total_poison_drain += 6
+			total_poison_drain += 3 + int(floor(float(RunState.current_floor) / 3.0))
 			tile.play_hazard_trigger_fx()
 
 	if total_spike_dmg > 0:
@@ -200,6 +211,7 @@ func _execute_boss_turn() -> void:
 	# A. Boss Burn Tick
 	var dot_dmg := boss_core.tick_turn_start_status()
 	if dot_dmg > 0:
+		spawn_floating_text("🔥 -%d" % dot_dmg, Color(1.0, 0.4, 0.0), boss_core.global_position + Vector2(40, 20))
 		_log("[color=#ff6600]🔥 Overheat Burn ticked! Dealt %d DMG to Core.[/color]" % dot_dmg)
 
 	if boss_core.current_hp <= 0:
@@ -212,6 +224,10 @@ func _execute_boss_turn() -> void:
 	var val: int = intent.get("value", 8)
 	var hits: int = intent.get("hits", 1)
 	var intent_name: String = intent.get("name", "Action")
+
+	# If enraged, bonus value
+	if boss_core.is_enraged:
+		val += 2
 
 	match type_val:
 		EnemyData.IntentType.PLANT_SPIKES:
@@ -233,12 +249,21 @@ func _execute_boss_turn() -> void:
 			_apply_damage_to_player(total_hit_dmg)
 		EnemyData.IntentType.SHIELD_UP:
 			boss_core.add_shield(val)
+			spawn_floating_text("+%d 🛡️" % val, Color(0.0, 0.8, 1.0), boss_core.global_position + Vector2(40, -10))
 			_log("[color=#0099ff]🛡️ Boss fortifies Firewall (+%d Shield).[/color]" % val)
 		EnemyData.IntentType.CORRUPT_REEL:
 			_log("[color=#ff9900]⚡ Boss fires EMP Shock! Corrupted %d orbital reels.[/color]" % val)
 			_corrupt_random_reels(val)
 
 	boss_core.advance_intent()
+
+	# C. Advance Battle Turn & Passive RAM Pulse (every 3 turns)
+	RunState.start_new_battle_turn()
+	if RunState.battle_turn_number % 3 == 0:
+		RunState.restore_ram(1)
+		spawn_floating_text("+1 💾 RAM PULSE", Color(0.2, 1.0, 0.5), ram_label.global_position)
+		_log("[color=#33ff66]⚡ System Pulse: Restored +1 RAM.[/color]")
+
 	is_resolving_turn = false
 
 	# Re-enable player controls for next spin if player still alive
@@ -260,16 +285,20 @@ func _plant_hazard_on_random_tiles(hazard: SlotTile.HazardType, count: int) -> v
 
 func _apply_damage_to_player(amount: int) -> void:
 	var remaining_dmg := RunState.take_damage_direct(amount)
+	trigger_screen_shake(3.0)
 	if remaining_dmg > 0:
 		AudioSynth.play_tone(150, 40, 0.3, -2.0, "noise")
+		spawn_floating_text("-%d 💳" % remaining_dmg, Color(1.0, 0.1, 0.2), player_hp_bar.global_position + Vector2(20, -10))
 		_log("[color=#ff0044]💥 Direct Hit! Lost %d Credits from Bankroll![/color]" % remaining_dmg)
 	else:
+		spawn_floating_text("🛡️ BLOCKED", Color(0.3, 0.9, 1.0), player_hp_bar.global_position + Vector2(20, -10))
 		_log("[color=#00ccff]🛡️ Firewall absorbed all incoming damage![/color]")
 		# Plasma converter check
 		if RunState.has_relic(RelicData.RelicType.PLASMA_CONVERTER) and RunState.player_shield > 0:
-			var reflected := int(round(RunState.player_shield * 0.4))
+			var reflected := int(round(RunState.player_shield * 0.3))
 			if reflected > 0:
 				boss_core.take_damage(reflected)
+				spawn_floating_text("⚡ -%d REFLECT" % reflected, Color(0.0, 1.0, 0.5), boss_core.global_position + Vector2(40, 20))
 				_log("[color=#00ff88]⚡ Kinetic Reflector! Absorbed shield dealt %d laser counter-damage to Boss![/color]" % reflected)
 
 	if RunState.credits <= 0:
@@ -299,6 +328,28 @@ func _on_boss_died(enemy: EnemyData) -> void:
 	win_timer.timeout.connect(func():
 		combat_won.emit(enemy, earned_credits)
 	)
+
+func spawn_floating_text(text: String, color: Color, spawn_pos: Vector2) -> void:
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.modulate = color
+	lbl.global_position = spawn_pos
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(lbl)
+
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(lbl, "position:y", lbl.position.y - 30.0, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(lbl, "modulate:a", 0.0, 0.8).set_delay(0.2)
+	tween.chain().tween_callback(lbl.queue_free)
+
+func trigger_screen_shake(intensity: float = 4.0) -> void:
+	var original_pos: Vector2 = orbital_slot_machine.position
+	var tween := create_tween()
+	for i in range(4):
+		var offset := Vector2(randf_range(-intensity, intensity), randf_range(-intensity, intensity))
+		tween.tween_property(orbital_slot_machine, "position", original_pos + offset, 0.03)
+	tween.tween_property(orbital_slot_machine, "position", original_pos, 0.03)
 
 func _log(bbcode: String) -> void:
 	log_label.append_text(bbcode + "\n")

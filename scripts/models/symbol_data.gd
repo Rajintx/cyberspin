@@ -13,7 +13,8 @@ enum SymbolType {
 	JACKPOT,     # 777 Cyber Chip (massive payout & fever triggers)
 	BATTERY,     # Overcharges adjacent perimeter symbols
 	MIRROR,      # Quantum Mirror (duplicates the opposite slot's symbol)
-	MINER        # Crypto Miner (generates bonus Credits dividend every spin)
+	MINER,       # Crypto Miner (generates bonus Credits dividend every spin)
+	MIMIC        # 😈 Trojan Mimic (Disguised chip that reveals on landing to bite or reward!)
 }
 
 enum Rarity {
@@ -27,8 +28,8 @@ enum Rarity {
 @export var display_name: String = "Plasma Laser"
 @export var symbol_type: SymbolType = SymbolType.ATTACK
 @export var rarity: Rarity = Rarity.COMMON
-@export var base_chips: int = 6       # Base value / chips
-@export var mult_add: float = 0.0     # +Mult addition
+@export var base_chips: int = 4       # Base value / chips
+@export var mult_add: float = 0.3     # +Mult addition
 @export var mult_factor: float = 1.0  # xMult multiplier
 @export var icon_glyph: String = "⚡"
 @export var icon_color: Color = Color(0.0, 0.95, 1.0)
@@ -57,4 +58,5 @@ func get_type_name() -> String:
 		SymbolType.BATTERY: return "REACTOR CELL"
 		SymbolType.MIRROR: return "QUANTUM MIRROR"
 		SymbolType.MINER: return "CRYPTO MINER"
+		SymbolType.MIMIC: return "TROJAN MIMIC"
 	return "UNKNOWN"

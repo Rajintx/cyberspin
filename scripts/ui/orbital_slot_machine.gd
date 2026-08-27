@@ -49,10 +49,10 @@ func _ready() -> void:
 	bet_toggle_btn.pressed.connect(_on_bet_toggle_pressed)
 	speed_toggle_btn.pressed.connect(_on_speed_toggle_pressed)
 
-	RunState.bet_changed.connect(_on_bet_changed)
+	RunState.spin_cost_changed.connect(_on_spin_cost_changed)
 	RunState.speed_changed.connect(_on_speed_changed)
 
-	_on_bet_changed(RunState.bet_level, RunState.get_current_ante(), RunState.get_current_mult())
+	_on_spin_cost_changed(RunState.get_current_spin_cost(), RunState.battle_turn_number)
 	_on_speed_changed(RunState.game_speed)
 
 	active_symbols.resize(8)
@@ -189,11 +189,11 @@ func _on_speed_toggle_pressed() -> void:
 	AudioSynth.play_click()
 	RunState.cycle_game_speed()
 
-func _on_bet_changed(level: int, ante_cost: int, mult: float) -> void:
-	bet_toggle_btn.text = "💰 %d💳 (x%.1f)" % [ante_cost, mult]
-	if level == 1:
+func _on_spin_cost_changed(cost: int, turn_num: int) -> void:
+	bet_toggle_btn.text = "💰 %d💳 (T%d)" % [cost, turn_num]
+	if cost <= 5:
 		bet_toggle_btn.modulate = Color(0.8, 0.9, 1.0)
-	elif level == 2:
+	elif cost <= 10:
 		bet_toggle_btn.modulate = Color(1.0, 0.8, 0.2)
 	else:
 		bet_toggle_btn.modulate = Color(1.0, 0.2, 0.5)

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b6q1v8m3x4k9w"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_a2b3c"]
+[ext_resource type="PackedScene" path="res://scenes/ui/character_select.tscn" id="2_c0d1e"]
 [ext_resource type="PackedScene" path="res://scenes/map/map_screen.tscn" id="2_m1s2t"]
 [ext_resource type="PackedScene" path="res://scenes/combat/combat_arena.tscn" id="3_c4a5b"]
 [ext_resource type="PackedScene" path="res://scenes/rewards/reward_screen.tscn" id="4_r6s7t"]
@@ -44,8 +45,13 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_a2b3c")
 
+[node name="CharacterSelect" parent="." instance=ExtResource("2_c0d1e")]
+unique_name_in_owner = true
+layout_mode = 1
+
 [node name="MapScreen" parent="." instance=ExtResource("2_m1s2t")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 
 [node name="CombatArena" parent="." instance=ExtResource("3_c4a5b")]

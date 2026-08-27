@@ -7,16 +7,23 @@ signal reward_completed()
 @onready var skip_button: Button = %SkipButton
 @onready var victory_label: Label = %VictoryLabel
 @onready var credits_reward_label: Label = %CreditsRewardLabel
+@onready var replace_modal: PanelContainer = %ReplaceModal
+@onready var replace_list: VBoxContainer = %ReplaceList
+@onready var cancel_replace_btn: Button = %CancelReplaceBtn
 
 var _current_choices: Array[SymbolData] = []
+var _pending_chosen_symbol: SymbolData
 
 func _ready() -> void:
 	skip_button.pressed.connect(_on_skip_pressed)
+	cancel_replace_btn.pressed.connect(func(): replace_modal.visible = false)
+	replace_modal.visible = false
 
 func show_rewards(earned_credits: int) -> void:
 	victory_label.text = "CORP ENFORCER PURGED // SECTOR CLEARED"
-	credits_reward_label.text = "+%d CREDITS TRANSFERRED TO WALLET" % earned_credits
+	credits_reward_label.text = "+%d CREDITS TRANSFERRED TO BANKROLL" % earned_credits
 	_current_choices = RunState.get_random_draft_symbols(3)
+	replace_modal.visible = false
 	_build_choice_cards()
 
 func _build_choice_cards() -> void:
@@ -59,29 +66,25 @@ func _create_reward_card(sym: SymbolData, index: int) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 8)
 	margin.add_child(vbox)
 
-	# Rarity badge
 	var rarity_lbl := Label.new()
 	rarity_lbl.text = SymbolData.Rarity.keys()[sym.rarity]
 	rarity_lbl.add_theme_font_size_override("font_size", 10)
 	rarity_lbl.modulate = Color(0.7, 0.7, 0.9)
 	vbox.add_child(rarity_lbl)
 
-	# Big Glyph
 	var glyph_lbl := Label.new()
 	glyph_lbl.text = sym.icon_glyph
-	glyph_lbl.add_theme_font_size_override("font_size", 44)
+	glyph_lbl.add_theme_font_size_override("font_size", 40)
 	glyph_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(glyph_lbl)
 
-	# Name
 	var name_lbl := Label.new()
 	name_lbl.text = sym.display_name
 	name_lbl.modulate = sym.icon_color
-	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_font_size_override("font_size", 13)
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(name_lbl)
 
-	# Description
 	var desc_lbl := Label.new()
 	desc_lbl.text = sym.description
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -90,10 +93,9 @@ func _create_reward_card(sym: SymbolData, index: int) -> PanelContainer:
 	desc_lbl.modulate = Color(0.8, 0.85, 0.95)
 	vbox.add_child(desc_lbl)
 
-	# Pick Button
 	var btn := Button.new()
 	btn.text = "INSTALL CHIP"
-	btn.custom_minimum_size = Vector2(0, 36)
+	btn.custom_minimum_size = Vector2(0, 34)
 	btn.focus_mode = Control.FOCUS_NONE
 
 	var btn_style := StyleBoxFlat.new()
@@ -113,9 +115,39 @@ func _create_reward_card(sym: SymbolData, index: int) -> PanelContainer:
 func _on_card_selected(index: int) -> void:
 	if index >= 0 and index < _current_choices.size():
 		var chosen: SymbolData = _current_choices[index]
-		RunState.add_symbol(chosen)
-		AudioSynth.play_jackpot()
-		reward_completed.emit()
+		if RunState.can_add_symbol():
+			RunState.add_symbol(chosen)
+			AudioSynth.play_jackpot()
+			reward_completed.emit()
+		else:
+			# Deck is full at 20 chips: show replace modal
+			_pending_chosen_symbol = chosen
+			_open_replace_modal()
+
+func _open_replace_modal() -> void:
+	for child in replace_list.get_children():
+		child.queue_free()
+
+	for i in range(RunState.symbol_deck.size()):
+		var sym: SymbolData = RunState.symbol_deck[i]
+		var row := HBoxContainer.new()
+		var lbl := Label.new()
+		lbl.text = "%s %s (Chips: %d, +%.1fM)" % [sym.icon_glyph, sym.display_name, sym.base_chips, sym.mult_add]
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(lbl)
+
+		var rep_btn := Button.new()
+		rep_btn.text = "REPLACE"
+		rep_btn.pressed.connect(func():
+			RunState.replace_symbol_at(i, _pending_chosen_symbol)
+			AudioSynth.play_jackpot()
+			replace_modal.visible = false
+			reward_completed.emit()
+		)
+		row.add_child(rep_btn)
+		replace_list.add_child(row)
+
+	replace_modal.visible = true
 
 func _on_skip_pressed() -> void:
 	RunState.modify_credits(15)

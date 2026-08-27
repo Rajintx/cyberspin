@@ -7,6 +7,7 @@ var enemy_data: EnemyData
 var current_hp: int = 50
 var max_hp: int = 50
 var current_shield: int = 0
+var is_enraged: bool = false
 
 # Status effect counters
 var overheat_stacks: int = 0
@@ -46,6 +47,7 @@ func init_enemy(data: EnemyData) -> void:
 	current_hp = max_hp
 	current_shield = data.starting_shield
 	current_intent_index = 0
+	is_enraged = false
 
 	overheat_stacks = 0
 	virus_stacks = 0
@@ -160,6 +162,10 @@ func take_damage(amount: int, is_piercing: bool = false) -> int:
 		actual_hp_damage = dmg_to_deal
 		current_hp = maxi(0, current_hp - dmg_to_deal)
 
+	# Check Enrage below 50% HP
+	if not is_enraged and current_hp <= int(max_hp * 0.5) and current_hp > 0:
+		_trigger_enrage()
+
 	_play_hit_reaction()
 	update_ui()
 
@@ -167,6 +173,15 @@ func take_damage(amount: int, is_piercing: bool = false) -> int:
 		boss_died.emit(enemy_data)
 
 	return actual_hp_damage
+
+func _trigger_enrage() -> void:
+	is_enraged = true
+	AudioSynth.play_emp()
+	name_label.text = "🔥 " + enemy_data.display_name + " [ENRAGED]"
+	name_label.modulate = Color(1.0, 0.1, 0.25)
+	if _base_style:
+		_base_style.border_color = Color(1.0, 0.1, 0.25)
+		_base_style.shadow_color = Color(1.0, 0.0, 0.2, 0.6)
 
 func add_shield(amount: int) -> void:
 	current_shield += amount
@@ -187,18 +202,15 @@ func add_status(type: String, stacks: int) -> void:
 
 func tick_turn_start_status() -> int:
 	var total_dot: int = 0
-	# Overheat burn ticks at turn start
 	if overheat_stacks > 0:
 		var burn_dmg: int = overheat_stacks
 		take_damage(burn_dmg, true)
 		total_dot += burn_dmg
 		overheat_stacks = maxi(0, overheat_stacks - 1)
 
-	# Glitch stacks decay by 1 each turn
 	if glitch_stacks > 0:
 		glitch_stacks = maxi(0, glitch_stacks - 1)
 
-	# EMP decay
 	if emp_stacks > 0:
 		emp_stacks = maxi(0, emp_stacks - 1)
 
@@ -206,7 +218,6 @@ func tick_turn_start_status() -> int:
 	return total_dot
 
 func tick_spin_virus_status() -> int:
-	# Virus deals damage on every lever spin!
 	if virus_stacks > 0:
 		var virus_dmg: int = virus_stacks
 		take_damage(virus_dmg, true)
@@ -217,10 +228,8 @@ func tick_spin_virus_status() -> int:
 func _play_hit_reaction() -> void:
 	AudioSynth.play_boss_hit()
 	var tween := create_tween().set_parallel(true)
-	# Flash red
 	hit_flash.modulate.a = 0.7
 	tween.tween_property(hit_flash, "modulate:a", 0.0, 0.25)
-	# Punch scale & shake
 	avatar_label.scale = Vector2(1.25, 1.25)
 	tween.tween_property(avatar_label, "scale", Vector2(1.0, 1.0), 0.2).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 

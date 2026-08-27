@@ -51,7 +51,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
 theme_override_font_sizes/font_size = 13
-text = "❤️ 80/80 HP  |  💾 5/5 RAM  |  💳 60 CREDITS"
+text = "💳 100 BANKROLL  |  💾 4/4 RAM  |  FLOOR 1/10"
 
 [node name="MapPipButton" type="Button" parent="TopBar"]
 unique_name_in_owner = true
@@ -63,37 +63,56 @@ theme_override_font_sizes/font_size = 11
 theme_override_styles/normal = SubResource("StyleBoxFlat_pip_btn")
 text = "📺 PiP MODE"
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="MainVBox" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 40.0
+offset_top = 56.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="Center"]
-layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 12
 alignment = 1
 
-[node name="MapTitleLabel" type="Label" parent="Center/VBox"]
+[node name="TitleBox" type="VBoxContainer" parent="MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="MapTitleLabel" type="Label" parent="MainVBox/TitleBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 20
-text = "NETWORK SECTOR MAP // FLOOR 1 OF 5"
+theme_override_font_sizes/font_size = 18
+text = "CYBER NETWORK MAP // FLOOR 1 OF 10"
 horizontal_alignment = 1
 
-[node name="InstructionLabel" type="Label" parent="Center/VBox"]
+[node name="InstructionLabel" type="Label" parent="MainVBox/TitleBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 text = "SELECT AN ACTIVE NODE TO ENGAGE TARGET SECTOR"
 horizontal_alignment = 1
 
-[node name="FloorsContainer" type="HBoxContainer" parent="Center/VBox"]
+[node name="MapScroll" type="ScrollContainer" parent="MainVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 520)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="ScrollMargin" type="MarginContainer" parent="MainVBox/MapScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_right = 32
+
+[node name="FloorsContainer" type="HBoxContainer" parent="MainVBox/MapScroll/ScrollMargin"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 24
-alignment = 1
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 32
+alignment = 0
