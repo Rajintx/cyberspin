@@ -79,12 +79,13 @@ text = "🔆"
 
 [node name="OpacitySlider" type="HSlider" parent="DragHeader/Margin/HBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 0)
+custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
 min_value = 25.0
 value = 95.0
+tooltip_text = "PiP Window Opacity (25% - 100%)"
 
 [node name="ExpandBtn" type="Button" parent="DragHeader/Margin/HBox"]
 unique_name_in_owner = true

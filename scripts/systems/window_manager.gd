@@ -10,7 +10,7 @@ var pip_opacity: float = 0.95
 var current_corner: CornerDock = CornerDock.BOTTOM_RIGHT
 
 const NORMAL_WINDOW_SIZE: Vector2i = Vector2i(1280, 720)
-const PIP_WINDOW_SIZE: Vector2i = Vector2i(560, 600)
+const PIP_WINDOW_SIZE: Vector2i = Vector2i(620, 680)
 const SCREEN_PADDING: int = 16
 
 var last_normal_pos: Vector2i = Vector2i(100, 100)

@@ -59,14 +59,10 @@ func connect_signals() -> void:
 	drag_header.gui_input.connect(_on_header_gui_input)
 	auto_spin_btn.toggled.connect(_on_auto_spin_toggled)
 
-func _on_pip_mode_changed(is_pip: bool) -> void:
+func _on_pip_mode_changed(_is_pip: bool) -> void:
 	var content_root := get_tree().root.get_node_or_null("MainGame")
 	if content_root:
-		if is_pip:
-			# ponytail: scale down UI content so it fits PiP window better
-			content_root.scale = Vector2(0.85, 0.85)
-		else:
-			content_root.scale = Vector2(1.0, 1.0)
+		content_root.scale = Vector2(1.0, 1.0)
 
 func _on_opacity_changed(alpha: float) -> void:
 	var parent_game := get_parent() as Control

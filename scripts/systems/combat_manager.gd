@@ -18,6 +18,9 @@ var boss_core: BossCore
 @onready var relic_container: HBoxContainer = %RelicContainer
 @onready var log_label: RichTextLabel = %CombatLog
 @onready var pip_button: Button = %PipButton
+@onready var side_panel: Control = %SidePanel
+@onready var v_separator_2: Control = %VSeparator2
+@onready var relic_label: Label = %RelicLabel
 
 var current_enemy: EnemyData
 var is_resolving_turn: bool = false
@@ -38,6 +41,8 @@ func _ready() -> void:
 		WindowManager.toggle_pip_mode()
 	)
 
+	WindowManager.window_mode_changed.connect(_on_window_mode_changed)
+
 	RunState.bankroll_changed.connect(_on_bankroll_changed)
 	RunState.shield_changed.connect(_on_shield_changed)
 	RunState.ram_changed.connect(_on_ram_changed)
@@ -45,6 +50,13 @@ func _ready() -> void:
 	RunState.relics_updated.connect(_on_relics_updated)
 
 	_update_all_hud()
+
+func _on_window_mode_changed(is_pip: bool) -> void:
+	side_panel.visible = not is_pip
+	v_separator_2.visible = not is_pip
+	relic_label.visible = not is_pip
+	relic_container.visible = not is_pip
+	pip_button.visible = not is_pip
 
 func start_combat(enemy: EnemyData) -> void:
 	current_enemy = enemy

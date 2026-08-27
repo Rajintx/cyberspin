@@ -178,9 +178,11 @@ theme_override_font_sizes/font_size = 13
 text = "💳 60 CREDITS"
 
 [node name="VSeparator2" type="VSeparator" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="RelicLabel" type="Label" parent="VBox/TopHUD/Margin/HBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 12
@@ -216,6 +218,7 @@ unique_name_in_owner = true
 layout_mode = 2
 
 [node name="SidePanel" type="VBoxContainer" parent="VBox/MainContent"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme_override_constants/separation = 8
