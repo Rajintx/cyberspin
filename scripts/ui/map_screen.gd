@@ -155,8 +155,3 @@ func _create_node_button(node_data: Dictionary, floor_num: int, current_floor: i
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_stylebox_override("disabled", style)
 	return btn
-
-func reset_view() -> void:
-	if map_scroll:
-		map_scroll.scroll_horizontal = 0
-	refresh_map()
