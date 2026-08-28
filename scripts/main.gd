@@ -11,6 +11,8 @@ extends Control
 @onready var end_desc: Label = %EndDesc
 @onready var stats_summary: Label = %StatsSummary
 @onready var restart_button: Button = %RestartButton
+@onready var settings_button: Button = %SettingsButton
+@onready var settings_modal: SettingsModal = %SettingsModal
 @onready var pip_overlay: PiPOverlay = %PiPOverlay
 @onready var crt_overlay: ColorRect = %CRTOverlay
 
@@ -22,18 +24,45 @@ func _ready() -> void:
 	reward_screen.reward_completed.connect(_on_reward_completed)
 	shop_screen.shop_closed.connect(_on_shop_closed)
 	restart_button.pressed.connect(_on_restart_pressed)
+	
+	settings_button.pressed.connect(_on_settings_pressed)
 
 	WindowManager.window_mode_changed.connect(_on_window_mode_changed)
+	WindowManager.opacity_changed.connect(_on_opacity_changed)
 
 	RunState.crt_toggled.connect(func(enabled: bool) -> void:
 		crt_overlay.visible = enabled
 	)
+	RunState.crt_params_changed.connect(func(intensity: float, curvature: float) -> void:
+		if crt_overlay.material is ShaderMaterial:
+			var mat := crt_overlay.material as ShaderMaterial
+			mat.set_shader_parameter("scanline_intensity", intensity)
+			mat.set_shader_parameter("curvature", curvature)
+	)
 	crt_overlay.visible = RunState.is_crt_enabled
 
+	_update_ui_opacity()
 	_show_screen(character_select)
+
+func _on_settings_pressed() -> void:
+	AudioSynth.play_click()
+	settings_modal.open_settings()
 
 func _on_window_mode_changed(is_pip: bool) -> void:
 	pip_overlay.visible = is_pip
+	settings_button.visible = not is_pip
+	if is_pip and settings_modal.visible:
+		settings_modal.visible = false
+	_update_ui_opacity()
+
+func _on_opacity_changed(_alpha: float) -> void:
+	_update_ui_opacity()
+
+func _update_ui_opacity() -> void:
+	if WindowManager.is_pip_mode:
+		modulate.a = WindowManager.pip_opacity
+	else:
+		modulate.a = 1.0
 
 func _show_screen(active_control: Control) -> void:
 	character_select.visible = (active_control == character_select)

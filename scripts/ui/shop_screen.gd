@@ -3,7 +3,10 @@ extends Control
 
 signal shop_closed()
 
+@onready var margin_container: MarginContainer = %Margin
+@onready var title_label: Label = %TitleLabel
 @onready var credits_label: Label = %ShopCreditsLabel
+@onready var scroll_container: ScrollContainer = %ScrollContainer
 @onready var symbols_shelf: HBoxContainer = %SymbolsShelf
 @onready var relics_shelf: HBoxContainer = %RelicsShelf
 @onready var expand_ram_btn: Button = %ExpandRamBtn
@@ -32,7 +35,32 @@ func _ready() -> void:
 		_update_ram_btn()
 	)
 
+	WindowManager.window_mode_changed.connect(_on_window_mode_changed)
+	_on_window_mode_changed(WindowManager.is_pip_mode)
+
+func _on_window_mode_changed(is_pip: bool) -> void:
+	if is_pip:
+		margin_container.add_theme_constant_override("margin_left", 12)
+		margin_container.add_theme_constant_override("margin_right", 12)
+		margin_container.add_theme_constant_override("margin_top", 44)
+		margin_container.add_theme_constant_override("margin_bottom", 10)
+		title_label.add_theme_font_size_override("font_size", 14)
+		credits_label.add_theme_font_size_override("font_size", 11)
+		leave_button.custom_minimum_size = Vector2(0, 40)
+		leave_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	else:
+		margin_container.add_theme_constant_override("margin_left", 24)
+		margin_container.add_theme_constant_override("margin_right", 24)
+		margin_container.add_theme_constant_override("margin_top", 16)
+		margin_container.add_theme_constant_override("margin_bottom", 16)
+		title_label.add_theme_font_size_override("font_size", 18)
+		credits_label.add_theme_font_size_override("font_size", 15)
+		leave_button.custom_minimum_size = Vector2(240, 38)
+		leave_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
 func open_shop() -> void:
+	if is_instance_valid(scroll_container):
+		scroll_container.scroll_vertical = 0
 	_update_credits(RunState.credits)
 	_update_ram_btn()
 	_generate_shop_inventory()

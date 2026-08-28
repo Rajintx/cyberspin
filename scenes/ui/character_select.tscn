@@ -50,6 +50,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="Margin" type="MarginContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,7 +64,7 @@ theme_override_constants/margin_bottom = 24
 
 [node name="VBox" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="TitleBox" type="VBoxContainer" parent="Margin/VBox"]
@@ -71,6 +72,7 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="Margin/VBox/TitleBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 24
@@ -78,49 +80,59 @@ text = "CHOOSE YOUR CYBER SPECIALIST"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Margin/VBox/TitleBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 text = "Select your loadout archetype before breaching the corporate mainframe."
 horizontal_alignment = 1
 
-[node name="CardsHBox" type="HBoxContainer" parent="Margin/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Margin/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="CardsHBox" type="HBoxContainer" parent="Margin/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="SniperCard" type="PanelContainer" parent="Margin/VBox/CardsHBox"]
+[node name="SniperCard" type="PanelContainer" parent="Margin/VBox/ScrollContainer/CardsHBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 360)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="Margin/VBox/CardsHBox/SniperCard"]
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/SniperCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="VBox" type="VBoxContainer" parent="Margin/VBox/CardsHBox/SniperCard/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/SniperCard/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Icon" type="Label" parent="Margin/VBox/CardsHBox/SniperCard/Margin/VBox"]
+[node name="Icon" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/SniperCard/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "🎯"
 horizontal_alignment = 1
 
-[node name="Name" type="Label" parent="Margin/VBox/CardsHBox/SniperCard/Margin/VBox"]
+[node name="Name" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/SniperCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "LASER SNIPER"
 horizontal_alignment = 1
 
-[node name="Desc" type="Label" parent="Margin/VBox/CardsHBox/SniperCard/Margin/VBox"]
+[node name="Desc" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/SniperCard/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
@@ -128,7 +140,7 @@ theme_override_font_sizes/font_size = 11
 text = "Focuses on concentrated critical strikes and cross-core piercing laser beams.\n\n• Starter: 4 Lasers, 3 Monoblades, 3 Firewalls, 2 RAM, 2 Batteries\n• Passive: High-Critical scaling"
 autowrap_mode = 2
 
-[node name="SniperBtn" type="Button" parent="Margin/VBox/CardsHBox/SniperCard/Margin/VBox"]
+[node name="SniperBtn" type="Button" parent="Margin/VBox/ScrollContainer/CardsHBox/SniperCard/Margin/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
@@ -138,38 +150,38 @@ theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_select_btn")
 text = "DEPLOY SNIPER"
 
-[node name="TankCard" type="PanelContainer" parent="Margin/VBox/CardsHBox"]
+[node name="TankCard" type="PanelContainer" parent="Margin/VBox/ScrollContainer/CardsHBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 360)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="Margin/VBox/CardsHBox/TankCard"]
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/TankCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="VBox" type="VBoxContainer" parent="Margin/VBox/CardsHBox/TankCard/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/TankCard/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Icon" type="Label" parent="Margin/VBox/CardsHBox/TankCard/Margin/VBox"]
+[node name="Icon" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/TankCard/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "🛡️"
 horizontal_alignment = 1
 
-[node name="Name" type="Label" parent="Margin/VBox/CardsHBox/TankCard/Margin/VBox"]
+[node name="Name" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/TankCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "FIREWALL TANK"
 horizontal_alignment = 1
 
-[node name="Desc" type="Label" parent="Margin/VBox/CardsHBox/TankCard/Margin/VBox"]
+[node name="Desc" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/TankCard/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
@@ -177,7 +189,7 @@ theme_override_font_sizes/font_size = 11
 text = "Master of defensive matrices and damage absorption.\n\n• Starter: 4 Firewalls, 3 Aegis Matrices, 3 Lasers, 2 RAM, 2 Batteries\n• Relic: Kinetic Reflector (Absorbed shield deals counter-damage)"
 autowrap_mode = 2
 
-[node name="TankBtn" type="Button" parent="Margin/VBox/CardsHBox/TankCard/Margin/VBox"]
+[node name="TankBtn" type="Button" parent="Margin/VBox/ScrollContainer/CardsHBox/TankCard/Margin/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
@@ -187,38 +199,38 @@ theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_select_btn")
 text = "DEPLOY TANK"
 
-[node name="HackerCard" type="PanelContainer" parent="Margin/VBox/CardsHBox"]
+[node name="HackerCard" type="PanelContainer" parent="Margin/VBox/ScrollContainer/CardsHBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 360)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="Margin/VBox/CardsHBox/HackerCard"]
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/HackerCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="VBox" type="VBoxContainer" parent="Margin/VBox/CardsHBox/HackerCard/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/HackerCard/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Icon" type="Label" parent="Margin/VBox/CardsHBox/HackerCard/Margin/VBox"]
+[node name="Icon" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/HackerCard/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "☣️"
 horizontal_alignment = 1
 
-[node name="Name" type="Label" parent="Margin/VBox/CardsHBox/HackerCard/Margin/VBox"]
+[node name="Name" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/HackerCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.2, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "MALWARE HACKER"
 horizontal_alignment = 1
 
-[node name="Desc" type="Label" parent="Margin/VBox/CardsHBox/HackerCard/Margin/VBox"]
+[node name="Desc" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/HackerCard/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
@@ -226,7 +238,7 @@ theme_override_font_sizes/font_size = 11
 text = "Infects the enemy core with persistent Virus bleed and Overheat burns.\n\n• Starter: 4 Data Worms, 3 Igniters, 3 EMPs, 2 Firewalls, 2 RAM\n• Bonus: +1 Max RAM\n• Relic: Viral Payload"
 autowrap_mode = 2
 
-[node name="HackerBtn" type="Button" parent="Margin/VBox/CardsHBox/HackerCard/Margin/VBox"]
+[node name="HackerBtn" type="Button" parent="Margin/VBox/ScrollContainer/CardsHBox/HackerCard/Margin/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
@@ -236,38 +248,38 @@ theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_select_btn")
 text = "DEPLOY HACKER"
 
-[node name="GamblerCard" type="PanelContainer" parent="Margin/VBox/CardsHBox"]
+[node name="GamblerCard" type="PanelContainer" parent="Margin/VBox/ScrollContainer/CardsHBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 360)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Margin" type="MarginContainer" parent="Margin/VBox/CardsHBox/GamblerCard"]
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/GamblerCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="VBox" type="VBoxContainer" parent="Margin/VBox/CardsHBox/GamblerCard/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/ScrollContainer/CardsHBox/GamblerCard/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Icon" type="Label" parent="Margin/VBox/CardsHBox/GamblerCard/Margin/VBox"]
+[node name="Icon" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/GamblerCard/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "🎰"
 horizontal_alignment = 1
 
-[node name="Name" type="Label" parent="Margin/VBox/CardsHBox/GamblerCard/Margin/VBox"]
+[node name="Name" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/GamblerCard/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 14
 text = "CRYPTO HIGH-ROLLER"
 horizontal_alignment = 1
 
-[node name="Desc" type="Label" parent="Margin/VBox/CardsHBox/GamblerCard/Margin/VBox"]
+[node name="Desc" type="Label" parent="Margin/VBox/ScrollContainer/CardsHBox/GamblerCard/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
@@ -275,7 +287,7 @@ theme_override_font_sizes/font_size = 11
 text = "High-stakes gambler with large starting bankroll and direct dividend engines.\n\n• Starter: 150 Bankroll (Credits), 3 Crypto Miners, 3 Jackpot 7s, 3 Lasers, 3 Firewalls, 2 RAM"
 autowrap_mode = 2
 
-[node name="GamblerBtn" type="Button" parent="Margin/VBox/CardsHBox/GamblerCard/Margin/VBox"]
+[node name="GamblerBtn" type="Button" parent="Margin/VBox/ScrollContainer/CardsHBox/GamblerCard/Margin/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2

@@ -53,9 +53,11 @@ func _ready() -> void:
 
 	RunState.spin_cost_changed.connect(_on_spin_cost_changed)
 	RunState.speed_changed.connect(_on_speed_changed)
+	RunState.ram_changed.connect(func(_curr: int, _max: int): update_action_buttons_state())
 
 	_on_spin_cost_changed(RunState.get_current_spin_cost(), RunState.battle_turn_number)
 	_on_speed_changed(RunState.game_speed)
+	update_action_buttons_state()
 
 	active_symbols.resize(8)
 
@@ -68,11 +70,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			var slot_idx: int = event.keycode - KEY_1
 			if slot_idx < 8 and not is_spinning:
 				_on_tile_lock_toggled(slot_idx, not locked_indices[slot_idx])
-		elif event.keycode == KEY_C and can_spin and not is_spinning:
+		elif event.keycode == KEY_C and can_spin and not is_spinning and RunState.player_ram >= 1:
 			_on_purge_pressed()
-		elif event.keycode == KEY_R and can_spin and not is_spinning:
+		elif event.keycode == KEY_R and can_spin and not is_spinning and RunState.player_ram >= 2:
 			_on_reroll_pressed()
-		elif event.keycode == KEY_O and can_spin and not is_spinning:
+		elif event.keycode == KEY_O and can_spin and not is_spinning and RunState.player_ram >= 3:
 			_on_overdrive_pressed()
 		elif event.keycode == KEY_B:
 			_on_bet_toggle_pressed()
@@ -105,6 +107,24 @@ func populate_initial_grid(deck: Array[SymbolData]) -> void:
 		var sym: SymbolData = pool[i % pool.size()].duplicate()
 		active_symbols[i] = sym
 		slot_tiles[i].set_symbol(sym)
+	update_action_buttons_state()
+
+func update_action_buttons_state() -> void:
+	if not can_spin or is_spinning:
+		purge_btn.disabled = true
+		reroll_btn.disabled = true
+		overdrive_btn.disabled = true
+		return
+
+	var has_hazards := false
+	for tile in slot_tiles:
+		if is_instance_valid(tile) and tile.hazard_type != SlotTile.HazardType.NONE:
+			has_hazards = true
+			break
+
+	purge_btn.disabled = (RunState.player_ram < 1) or (not has_hazards)
+	reroll_btn.disabled = (RunState.player_ram < 2)
+	overdrive_btn.disabled = (RunState.player_ram < 3)
 
 func set_controls_enabled(enabled: bool) -> void:
 	can_spin = enabled
@@ -112,10 +132,9 @@ func set_controls_enabled(enabled: bool) -> void:
 		is_spinning = false
 	spin_button.disabled = not enabled
 	lever_knob.disabled = not enabled
-	purge_btn.disabled = not enabled
-	reroll_btn.disabled = not enabled
-	overdrive_btn.disabled = not enabled
 	bet_toggle_btn.disabled = not enabled
+	speed_toggle_btn.disabled = not enabled
+	update_action_buttons_state()
 
 func set_pip_mode(is_pip: bool) -> void:
 	spin_button.add_theme_font_size_override("font_size", 16 if is_pip else 14)
@@ -194,7 +213,7 @@ func _on_reroll_pressed() -> void:
 func _on_overdrive_pressed() -> void:
 	if is_spinning or not can_spin:
 		return
-	if RunState.spend_ram(2):
+	if RunState.spend_ram(3):
 		AudioSynth.play_jackpot()
 		show_banner("⚡ OVERDRIVE: Laser Cross-Beam Guaranteed!")
 		var heavy_laser := RunState.get_symbol_by_id("laser")
@@ -207,8 +226,9 @@ func _on_overdrive_pressed() -> void:
 			locked_indices[5] = true
 			slot_tiles[1].set_locked(true)
 			slot_tiles[5].set_locked(true)
+		update_action_buttons_state()
 	else:
-		show_banner("⚠️ NOT ENOUGH RAM FOR OVERDRIVE! (Cost: 2 RAM)")
+		show_banner("⚠️ NOT ENOUGH RAM FOR OVERDRIVE! (Cost: 3 RAM)")
 
 func _on_bet_toggle_pressed() -> void:
 	AudioSynth.play_click()
@@ -247,6 +267,7 @@ func show_banner(text: String) -> void:
 func set_slot_hazard(slot_index: int, hazard: SlotTile.HazardType) -> void:
 	if slot_index >= 0 and slot_index < 8:
 		slot_tiles[slot_index].set_hazard(hazard)
+		update_action_buttons_state()
 
 func set_slot_corrupted(slot_index: int, corrupted: bool) -> void:
 	if slot_index >= 0 and slot_index < 8:
@@ -255,7 +276,9 @@ func set_slot_corrupted(slot_index: int, corrupted: bool) -> void:
 
 func clear_all_hazards() -> void:
 	for i in range(8):
-		slot_tiles[i].clear_hazard()
+		if is_instance_valid(slot_tiles[i]):
+			slot_tiles[i].clear_hazard()
+	update_action_buttons_state()
 
 func clear_all_corruptions() -> void:
 	for i in range(8):

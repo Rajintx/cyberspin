@@ -13,13 +13,52 @@ const NORMAL_WINDOW_SIZE: Vector2i = Vector2i(1280, 720)
 const PIP_WINDOW_SIZE: Vector2i = Vector2i(620, 680)
 const SCREEN_PADDING: int = 16
 
+const RESOLUTION_PRESETS: Array[Dictionary] = [
+	{"label": "1280 x 720 (Default)", "size": Vector2i(1280, 720)},
+	{"label": "1600 x 900 (HD+)", "size": Vector2i(1600, 900)},
+	{"label": "1920 x 1080 (Full HD)", "size": Vector2i(1920, 1080)},
+	{"label": "960 x 540 (Compact)", "size": Vector2i(960, 540)}
+]
+
 var last_normal_pos: Vector2i = Vector2i(100, 100)
+var current_resolution: Vector2i = Vector2i(1280, 720)
+var is_fullscreen: bool = false
 var is_dragging_window: bool = false
 var drag_start_mouse_pos: Vector2i = Vector2i.ZERO
 var drag_start_win_pos: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+func set_resolution(target_size: Vector2i) -> void:
+	current_resolution = target_size
+	if not is_pip_mode and not is_fullscreen:
+		DisplayServer.window_set_size(target_size)
+		# Keep base content scale size at standard 1280x720 so canvas_items stretch handles aspect scaling correctly
+		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
+		# Center window on current screen
+		var current_screen := DisplayServer.window_get_current_screen()
+		var screen_rect := DisplayServer.screen_get_usable_rect(current_screen)
+		var new_pos := Vector2i(
+			screen_rect.position.x + int((screen_rect.size.x - target_size.x) / 2.0),
+			screen_rect.position.y + int((screen_rect.size.y - target_size.y) / 2.0)
+		)
+		DisplayServer.window_set_position(new_pos)
+		last_normal_pos = new_pos
+
+func toggle_fullscreen() -> void:
+	set_fullscreen(not is_fullscreen)
+
+func set_fullscreen(enabled: bool) -> void:
+	is_fullscreen = enabled
+	if is_fullscreen:
+		if is_pip_mode:
+			set_pip_mode(false)
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		set_resolution(current_resolution)
 
 func _process(_delta: float) -> void:
 	if is_dragging_window:
@@ -37,6 +76,7 @@ func set_pip_mode(enable: bool) -> void:
 		last_normal_pos = DisplayServer.window_get_position()
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP, true)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
+		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_TRANSPARENT, true)
 		DisplayServer.window_set_size(PIP_WINDOW_SIZE)
 		get_tree().root.content_scale_size = PIP_WINDOW_SIZE
 		get_tree().root.transparent_bg = true
@@ -44,6 +84,7 @@ func set_pip_mode(enable: bool) -> void:
 	else:
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP, false)
 		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, false)
+		DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_TRANSPARENT, false)
 		DisplayServer.window_set_size(NORMAL_WINDOW_SIZE)
 		get_tree().root.content_scale_size = NORMAL_WINDOW_SIZE
 		get_tree().root.transparent_bg = false

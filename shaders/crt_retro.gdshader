@@ -9,11 +9,9 @@ uniform float chromatic_aberration : hint_range(0.0, 0.01) = 0.002;
 uniform float crt_brightness : hint_range(0.5, 2.0) = 1.06;
 
 vec2 curve(vec2 uv) {
-	uv = (uv - 0.5) * 2.0;
-	uv *= 1.05;
-	uv.x *= 1.0 + pow((abs(uv.y) / 5.0), 2.0) * curvature * 10.0;
-	uv.y *= 1.0 + pow((abs(uv.x) / 4.0), 2.0) * curvature * 10.0;
-	uv = (uv / 2.0) + 0.5;
+	vec2 d = uv - 0.5;
+	float r2 = dot(d, d);
+	uv = uv + d * (r2 * curvature * 2.0);
 	return uv;
 }
 
@@ -21,11 +19,12 @@ void fragment() {
 	vec2 uv = curve(SCREEN_UV);
 
 	if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-		COLOR = vec4(0.0, 0.0, 0.0, 1.0);
+		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
 	} else {
 		// Chromatic Aberration (RGB Channel Shift)
+		vec4 center_sample = texture(screen_texture, uv);
 		float r = texture(screen_texture, uv + vec2(chromatic_aberration, 0.0)).r;
-		float g = texture(screen_texture, uv).g;
+		float g = center_sample.g;
 		float b = texture(screen_texture, uv - vec2(chromatic_aberration, 0.0)).b;
 		vec3 col = vec3(r, g, b) * crt_brightness;
 
@@ -38,6 +37,6 @@ void fragment() {
 		vig = clamp(pow(vig, vignette_intensity), 0.0, 1.0);
 		col *= vig;
 
-		COLOR = vec4(col, 1.0);
+		COLOR = vec4(col, center_sample.a);
 	}
 }
