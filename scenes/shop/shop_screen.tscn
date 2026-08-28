@@ -31,6 +31,20 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_leave"]
+bg_color = Color(0, 0.65, 0.45, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 1, 0.7, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0.8, 0.4, 0.3)
+shadow_size = 6
+
 [node name="ShopScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -50,6 +64,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="Margin" type="MarginContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,12 +78,13 @@ theme_override_constants/margin_bottom = 16
 
 [node name="VBox" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="TopBar" type="HBoxContainer" parent="Margin/VBox"]
 layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="Margin/VBox/TopBar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
@@ -85,45 +101,64 @@ text = "💳 WALLET: 60 CREDITS"
 [node name="HSeparator" type="HSeparator" parent="Margin/VBox"]
 layout_mode = 2
 
-[node name="SymbolsTitle" type="Label" parent="Margin/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="ScrollContent" type="VBoxContainer" parent="Margin/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SymbolsTitle" type="Label" parent="Margin/VBox/ScrollContainer/ScrollContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "AVAILABLE CYBER-SYMBOLS"
 
-[node name="SymbolsShelf" type="HBoxContainer" parent="Margin/VBox"]
+[node name="SymbolsShelf" type="HBoxContainer" parent="Margin/VBox/ScrollContainer/ScrollContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="RelicsTitle" type="Label" parent="Margin/VBox"]
+[node name="RelicsTitle" type="Label" parent="Margin/VBox/ScrollContainer/ScrollContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.4, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "HARDWARE AUGMENTS"
 
-[node name="RelicsShelf" type="HBoxContainer" parent="Margin/VBox"]
+[node name="RelicsShelf" type="HBoxContainer" parent="Margin/VBox/ScrollContainer/ScrollContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="ServicesBar" type="HBoxContainer" parent="Margin/VBox"]
+[node name="ServicesTitle" type="Label" parent="Margin/VBox/ScrollContainer/ScrollContent"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_colors/font_color = Color(0.9, 0.75, 0.2, 1)
+theme_override_font_sizes/font_size = 12
+text = "VENDOR SERVICES"
+
+[node name="ServicesBar" type="HFlowContainer" parent="Margin/VBox/ScrollContainer/ScrollContent"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
 alignment = 1
 
-[node name="ExpandRamBtn" type="Button" parent="Margin/VBox/ServicesBar"]
+[node name="ExpandRamBtn" type="Button" parent="Margin/VBox/ScrollContainer/ScrollContent/ServicesBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 36)
+custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
 text = "💾 +1 RAM (50💳)"
 
-[node name="RestockBtn" type="Button" parent="Margin/VBox/ServicesBar"]
+[node name="RestockBtn" type="Button" parent="Margin/VBox/ScrollContainer/ScrollContent/ServicesBar"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 36)
 layout_mode = 2
@@ -132,7 +167,7 @@ theme_override_colors/font_color = Color(0.8, 0.5, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
 text = "🎲 RESTOCK (15💳)"
 
-[node name="HealButton" type="Button" parent="Margin/VBox/ServicesBar"]
+[node name="HealButton" type="Button" parent="Margin/VBox/ScrollContainer/ScrollContent/ServicesBar"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(170, 36)
 layout_mode = 2
@@ -141,21 +176,28 @@ theme_override_colors/font_color = Color(0.2, 0.9, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
 text = "RESTORE 15 HP (18💳)"
 
-[node name="PurgeButton" type="Button" parent="Margin/VBox/ServicesBar"]
+[node name="PurgeButton" type="Button" parent="Margin/VBox/ScrollContainer/ScrollContent/ServicesBar"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
 focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.4, 0.6, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
 text = "PURGE CHIP (25💳)"
 
-[node name="LeaveButton" type="Button" parent="Margin/VBox/ServicesBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 36)
+[node name="BottomBar" type="MarginContainer" parent="Margin/VBox"]
 layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="LeaveButton" type="Button" parent="Margin/VBox/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 38)
+layout_mode = 2
+size_flags_horizontal = 4
 focus_mode = 0
-theme_override_colors/font_color = Color(0.2, 1, 0.6, 1)
-theme_override_styles/normal = SubResource("StyleBoxFlat_act_btn")
+theme_override_colors/font_color = Color(0.04, 0.08, 0.06, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_leave")
 text = "CONTINUE ➔"
 
 [node name="PurgeModal" type="PanelContainer" parent="."]
