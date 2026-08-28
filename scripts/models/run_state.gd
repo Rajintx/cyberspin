@@ -10,8 +10,6 @@ signal relics_updated(relics: Array[RelicData])
 signal crt_toggled(enabled: bool)
 signal crt_params_changed(intensity: float, curvature: float)
 
-const ClassDatabase = preload("res://scripts/data/class_database.gd")
-
 # Singleton reference
 static var instance: Node
 

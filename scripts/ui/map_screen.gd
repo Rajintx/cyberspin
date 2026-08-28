@@ -8,7 +8,6 @@ signal node_selected(node_type: String, floor_number: int)
 @onready var title_label: Label = %MapTitleLabel
 @onready var header_stats: Label = %HeaderStats
 @onready var map_pip_button: Button = %MapPipButton
-const MapDatabase = preload("res://scripts/data/map_database.gd")
 
 var map_structure: Array[Array] = MapDatabase.get_map_structure()
 

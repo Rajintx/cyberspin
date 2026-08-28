@@ -96,6 +96,7 @@ func start_combat(enemy: EnemyData) -> void:
 	_log("[color=#00f0ff]=== ENGAGING ENEMY: %s ===[/color]" % enemy.display_name)
 	_log("[color=#8888aa]\"%s\"[/color]" % enemy.flavor_quote)
 	CrashLog.log_info("CombatManager", "Combat Start: %s (HP:%d Shield:%d) Floor:%d Bankroll:%d" % [enemy.display_name, enemy.max_hp, enemy.starting_shield, RunState.current_floor, RunState.credits])
+	AudioSynth.set_combat_intensity(enemy.is_boss, RunState.credits < 20)
 	_update_all_hud()
 
 	if _check_player_bankrupt():
@@ -114,6 +115,7 @@ func _on_bankroll_changed(current: int, max_val: int) -> void:
 	player_hp_bar.value = current
 	player_hp_label.text = "💳 %d BANKROLL" % current
 	credits_label.text = "💳 %d CREDITS" % current
+	AudioSynth.set_combat_intensity(current_enemy != null and current_enemy.is_boss, current < 20)
 
 func _on_shield_changed(current: int) -> void:
 	player_shield_bar.max_value = maxi(current, 30)
@@ -345,6 +347,7 @@ func _execute_boss_turn() -> void:
 func _check_player_bankrupt() -> bool:
 	var ante_cost := RunState.get_current_spin_cost()
 	if RunState.credits <= 0 or RunState.credits < ante_cost:
+		AudioSynth.set_combat_intensity(false, false)
 		_log("[color=#ff0000]☠️ BANKRUPTCY: TERMINAL BANKROLL (%d 💳) INSUFFICIENT FOR SPIN ANTE (%d 💳).[/color]" % [RunState.credits, ante_cost])
 		CrashLog.log_info("CombatManager", "GAME OVER: Bankroll %d < Ante %d on Floor %d Turn %d" % [RunState.credits, ante_cost, RunState.current_floor, RunState.battle_turn_number])
 		if is_instance_valid(orbital_slot_machine):
@@ -393,6 +396,7 @@ func _corrupt_random_reels(count: int) -> void:
 		orbital_slot_machine.set_slot_corrupted(indices[i], true)
 
 func _on_boss_died(enemy: EnemyData) -> void:
+	AudioSynth.set_combat_intensity(false, false)
 	_log("[color=#00ff88]🏆 ENEMY CORE DESTROYED! VICTORY ACHIEVED.[/color]")
 	RunState.total_enemies_purged += 1
 	var earned_credits := enemy.credits_reward

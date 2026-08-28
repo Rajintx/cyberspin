@@ -1,4 +1,4 @@
-﻿class_name SettingsModal
+class_name SettingsModal
 extends Control
 
 signal closed()
@@ -7,6 +7,13 @@ signal closed()
 @onready var crt_toggle: CheckButton = %CrtToggle
 @onready var crt_slider: HSlider = %CrtSlider
 @onready var crt_val_label: Label = %CrtValLabel
+
+@onready var master_vol_slider: HSlider = %MasterVolSlider
+@onready var master_vol_label: Label = %MasterVolLabel
+@onready var sfx_vol_slider: HSlider = %SfxVolSlider
+@onready var sfx_vol_label: Label = %SfxVolLabel
+@onready var ambient_vol_slider: HSlider = %AmbientVolSlider
+@onready var ambient_vol_label: Label = %AmbientVolLabel
 
 @onready var resolution_opt: OptionButton = %ResolutionOpt
 @onready var fullscreen_toggle: CheckButton = %FullscreenToggle
@@ -20,6 +27,11 @@ func _ready() -> void:
 	crt_toggle.toggled.connect(_on_crt_toggled)
 	crt_slider.value_changed.connect(_on_crt_slider_changed)
 	
+	# Setup Audio Controls
+	master_vol_slider.value_changed.connect(_on_master_vol_changed)
+	sfx_vol_slider.value_changed.connect(_on_sfx_vol_changed)
+	ambient_vol_slider.value_changed.connect(_on_ambient_vol_changed)
+
 	# Setup Resolution OptionButton
 	resolution_opt.clear()
 	for i in range(WindowManager.RESOLUTION_PRESETS.size()):
@@ -44,6 +56,16 @@ func _refresh_ui_values() -> void:
 	_update_crt_label(RunState.crt_level)
 	crt_slider.editable = RunState.is_crt_enabled
 
+	# Audio Volumes
+	master_vol_slider.set_value_no_signal(AudioSynth.master_volume * 100.0)
+	master_vol_label.text = "%d%%" % int(round(AudioSynth.master_volume * 100.0))
+	
+	sfx_vol_slider.set_value_no_signal(AudioSynth.sfx_volume * 100.0)
+	sfx_vol_label.text = "%d%%" % int(round(AudioSynth.sfx_volume * 100.0))
+	
+	ambient_vol_slider.set_value_no_signal(AudioSynth.ambient_volume * 100.0)
+	ambient_vol_label.text = "%d%%" % int(round(AudioSynth.ambient_volume * 100.0))
+
 	# Resolution
 	var cur_res := WindowManager.current_resolution
 	var found_idx: int = 0
@@ -60,6 +82,21 @@ func _refresh_ui_values() -> void:
 	# Opacity
 	pip_opacity_slider.set_value_no_signal(WindowManager.pip_opacity * 100.0)
 	_update_opacity_label(WindowManager.pip_opacity)
+
+func _on_master_vol_changed(value: float) -> void:
+	var linear := value / 100.0
+	AudioSynth.set_master_volume(linear)
+	master_vol_label.text = "%d%%" % int(round(value))
+
+func _on_sfx_vol_changed(value: float) -> void:
+	var linear := value / 100.0
+	AudioSynth.set_sfx_volume(linear)
+	sfx_vol_label.text = "%d%%" % int(round(value))
+
+func _on_ambient_vol_changed(value: float) -> void:
+	var linear := value / 100.0
+	AudioSynth.set_ambient_volume(linear)
+	ambient_vol_label.text = "%d%%" % int(round(value))
 
 func _on_crt_toggled(toggled_on: bool) -> void:
 	AudioSynth.play_click()

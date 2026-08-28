@@ -1,4 +1,4 @@
-﻿[gd_scene format=3 uid="uid://s3tt1ng5m0d4l"]
+[gd_scene format=3 uid="uid://s3tt1ng5m0d4l"]
 
 [ext_resource type="Script" path="res://scripts/ui/settings_modal.gd" id="1_s1t2u"]
 
@@ -139,6 +139,102 @@ text = "100%"
 horizontal_alignment = 2
 
 [node name="HSeparator2" type="HSeparator" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+
+[node name="MasterVolRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/MasterVolRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+text = "🔊 Master Volume"
+
+[node name="MasterVolSlider" type="HSlider" parent="Center/Panel/Margin/VBox/SettingsList/MasterVolRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+focus_mode = 0
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 100.0
+
+[node name="MasterVolLabel" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/MasterVolRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "100%"
+horizontal_alignment = 2
+
+[node name="SfxVolRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/SfxVolRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "💥 SFX Volume"
+
+[node name="SfxVolSlider" type="HSlider" parent="Center/Panel/Margin/VBox/SettingsList/SfxVolRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+focus_mode = 0
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 100.0
+
+[node name="SfxVolLabel" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/SfxVolRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "100%"
+horizontal_alignment = 2
+
+[node name="AmbientVolRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/AmbientVolRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "🎵 Cyber Ambient"
+
+[node name="AmbientVolSlider" type="HSlider" parent="Center/Panel/Margin/VBox/SettingsList/AmbientVolRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+focus_mode = 0
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 65.0
+
+[node name="AmbientVolLabel" type="Label" parent="Center/Panel/Margin/VBox/SettingsList/AmbientVolRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "65%"
+horizontal_alignment = 2
+
+[node name="HSeparator3" type="HSeparator" parent="Center/Panel/Margin/VBox/SettingsList"]
 layout_mode = 2
 
 [node name="ResolutionRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/SettingsList"]
